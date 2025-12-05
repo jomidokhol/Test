@@ -3,43 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Login Redirect</title>
+    <title>Google Login Final Test</title>
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f0f2f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+        
+        h2 { color: #333; margin-bottom: 20px; }
+        
         #userInfo { display: none; }
-        img { border-radius: 50%; width: 80px; margin-bottom: 10px; }
-        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #4285F4; color: white; border: none; border-radius: 5px; width: 100%; margin-top: 10px;}
-        button:hover { background-color: #357ae8; }
-        #logoutBtn { background-color: #ff4444; }
-        p { font-size: 14px; color: #555; }
+        img { border-radius: 50%; width: 90px; height: 90px; margin-bottom: 15px; border: 3px solid #e0e0e0; }
+        
+        /* বাটনের ডিজাইন */
+        button { padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 6px; width: 100%; transition: background 0.3s; margin-top: 10px; }
+        
+        #loginBtn { background-color: #4285F4; color: white; }
+        #loginBtn:hover { background-color: #357ae8; }
+        
+        #logoutBtn { background-color: #ff4d4d; color: white; }
+        #logoutBtn:hover { background-color: #e60000; }
+        
+        .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>Google সাইন-ইন</h2>
-        <p id="status">লোডিং হচ্ছে...</p>
 
         <!-- লগিন বাটন -->
-        <button id="loginBtn" style="display:none;">Google দিয়ে লগিন করুন</button>
+        <button id="loginBtn">Google দিয়ে লগিন করুন</button>
+        <p id="errorText" class="error-msg"></p>
 
         <!-- লগিন করার পর যা দেখাবে -->
         <div id="userInfo">
             <img id="userPhoto" src="" alt="User Photo">
             <h3 id="userName"></h3>
-            <p id="userEmail"></p>
+            <p id="userEmail" style="color: #666; font-size: 14px;"></p>
             <button id="logoutBtn">লগ আউট</button>
         </div>
     </div>
 
     <!-- ফায়ারবেস স্ক্রিপ্ট -->
     <script type="module">
-        // Popup এর বদলে Redirect ইমপোর্ট করা হলো
+        // ১. ফায়ারবেস ইম্পোর্ট
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, signOut, onAuthStateChanged, getRedirectResult } 
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+        // ২. আপনার কনফিগারেশন
         const firebaseConfig = {
             apiKey: "AIzaSyAtfjaSSlaDYUsogHrvBn_6MbEbM-M-O4Q",
             authDomain: "test-g-login-nur.firebaseapp.com",
@@ -50,63 +61,69 @@
             measurementId: "G-QX5D57GRX8"
         };
 
+        // ৩. ফায়ারবেস অ্যাপ ইনিশিয়লাইজ
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
+        // HTML এলিমেন্ট ধরা
         const loginBtn = document.getElementById("loginBtn");
         const logoutBtn = document.getElementById("logoutBtn");
         const userInfo = document.getElementById("userInfo");
         const userName = document.getElementById("userName");
         const userEmail = document.getElementById("userEmail");
         const userPhoto = document.getElementById("userPhoto");
-        const statusTxt = document.getElementById("status");
+        const errorText = document.getElementById("errorText");
 
-        // ১. লগিন বাটনে ক্লিক করলে (Redirect হবে)
+        // ৪. লগিন ফাংশন (আপনার অনুরোধ মতো এরর হ্যান্ডলিং সহ)
         loginBtn.addEventListener("click", () => {
-            statusTxt.innerText = "গুগল পেজে নেওয়া হচ্ছে...";
-            signInWithRedirect(auth, provider);
+            errorText.style.display = 'none'; // আগের এরর মেসেজ সরানো
+            
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("Login Success", result.user);
+                    // সফল হলে কিছু করার দরকার নেই, onAuthStateChanged অটোমেটিক কাজ করবে
+                })
+                .catch((error) => {
+                    console.error("Login Error:", error);
+                    
+                    // এখানে বিস্তারিত এরর দেখাবে
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    
+                    // স্ক্রিনে এরর দেখানো
+                    alert("লগিন সমস্যা!\nCode: " + errorCode + "\nMessage: " + errorMessage);
+                    
+                    errorText.innerText = "Error: " + errorMessage;
+                    errorText.style.display = 'block';
+                });
         });
 
-        // ২. লগ আউট ফাংশন
+        // ৫. লগ আউট ফাংশন
         logoutBtn.addEventListener("click", () => {
             signOut(auth).then(() => {
-                alert("লগ আউট সফল!");
-                location.reload(); // পেজ রিফ্রেশ হবে
+                alert("আপনি লগ আউট করেছেন!");
             }).catch((error) => {
-                console.error(error);
+                console.error("Logout Error:", error);
             });
         });
 
-        // ৩. পেজ লোড হওয়ার পর রিডাইরেক্ট রেজাল্ট চেক করা (যদি কোনো এরর থাকে)
-        getRedirectResult(auth)
-            .then((result) => {
-                if (result) {
-                    console.log("রিডাইরেক্ট সফল:", result.user);
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                alert("লগিন সমস্যা: " + error.message);
-                statusTxt.innerText = "সমস্যা: " + error.message;
-            });
-
-        // ৪. ইউজার স্ট্যাটাস চেক করা
+        // ৬. ইউজার স্ট্যাটাস চেক (রিয়েলটাইম)
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // লগিন অবস্থায়
+                // ইউজার লগিন থাকলে
                 loginBtn.style.display = "none";
                 userInfo.style.display = "block";
-                statusTxt.style.display = "none";
+                errorText.style.display = "none";
                 
                 userName.innerText = user.displayName;
                 userEmail.innerText = user.email;
-                userPhoto.src = user.photoURL;
+                // ছবি না থাকলে ডিফল্ট ছবি দেখাবে
+                userPhoto.src = user.photoURL || "https://via.placeholder.com/90";
             } else {
-                // লগিন ছাড়া অবস্থায়
+                // ইউজার লগিন না থাকলে
                 loginBtn.style.display = "block";
                 userInfo.style.display = "none";
-                statusTxt.innerText = "লগিন করতে নিচের বাটনে চাপুন";
             }
         });
     </script>

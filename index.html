@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Login</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        #userInfo { display: none; }
+        img { border-radius: 50%; width: 100px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>আমার সাইটে স্বাগতম</h2>
+
+    <!-- লগিন বাটন -->
+    <button id="loginBtn">Google দিয়ে লগিন করুন</button>
+
+    <!-- লগিন করার পর যা দেখাবে -->
+    <div id="userInfo">
+        <img id="userPhoto" src="" alt="User Photo">
+        <h3 id="userName"></h3>
+        <p id="userEmail"></p>
+        <button id="logoutBtn">লগ আউট</button>
+    </div>
+
+    <!-- ফায়ারবেস স্ক্রিপ্ট -->
+    <script type="module">
+        // ১. ফায়ারবেস ইম্পোর্ট করা
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // ২. আপনার ফায়ারবেস কনফিগারেশন (ধাপ ২ এ যা কপি করেছিলেন তা এখানে বসান)
+        // নিচের অংশটুকু মুছে আপনার আসল কোড বসাবেন
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxxxxxxxxx...",
+            authDomain: "আপনার-প্রজেক্ট-আইডি.firebaseapp.com",
+            projectId: "আপনার-প্রজেক্ট-আইডি",
+            storageBucket: "...",
+            messagingSenderId: "...",
+            appId: "..."
+        };
+
+        // ৩. ফায়ারবেস চালু করা
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // HTML এলিমেন্ট ধরা
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const userInfo = document.getElementById("userInfo");
+        const userName = document.getElementById("userName");
+        const userEmail = document.getElementById("userEmail");
+        const userPhoto = document.getElementById("userPhoto");
+
+        // ৪. লগিন ফাংশন
+        loginBtn.addEventListener("click", () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("Login Success", result.user);
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("লগিন এরর: " + error.message);
+                });
+        });
+
+        // ৫. লগ আউট ফাংশন
+        logoutBtn.addEventListener("click", () => {
+            signOut(auth).then(() => {
+                alert("লগ আউট হয়েছে!");
+            });
+        });
+
+        // ৬. ইউজার লগিন অবস্থায় আছে কি না চেক করা
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // ইউজার লগিন থাকলে
+                loginBtn.style.display = "none";
+                userInfo.style.display = "block";
+                userName.innerText = "স্বাগতম, " + user.displayName;
+                userEmail.innerText = user.email;
+                userPhoto.src = user.photoURL;
+            } else {
+                // ইউজার লগিন না থাকলে
+                loginBtn.style.display = "inline-block";
+                userInfo.style.display = "none";
+            }
+        });
+    </script>
+
+</body>
+</html>

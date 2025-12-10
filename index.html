@@ -171,6 +171,12 @@
         .list-item-img {
             width: 40px; height: 40px; object-fit: cover; border-radius: 50%;
         }
+        
+        /* Action buttons in tables */
+        .action-btn {
+            cursor: pointer;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -366,30 +372,54 @@
                     </div>
                 </div>
 
-                <!-- Updates Section -->
+                <!-- Updates Section (Updated with List and Edit/Delete) -->
                 <div id="updates" class="page-section fade-in d-none">
                     <div class="card p-4">
-                        <h5 class="mb-4">নতুন নিউজ পাবলিশ করুন</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">শিরোনাম</label>
-                                <input type="text" class="form-control" id="newsTitle">
+                        <h5 class="mb-4">নিউজ ম্যানেজমেন্ট</h5>
+                        
+                        <!-- Form -->
+                        <div class="card bg-body-tertiary p-3 mb-4">
+                            <h6 class="mb-3 text-muted" id="newsFormTitle">নতুন নিউজ পাবলিশ করুন</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">শিরোনাম</label>
+                                    <input type="text" class="form-control" id="newsTitle">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">তারিখ</label>
+                                    <input type="date" class="form-control" id="newsDate">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">ছবির URL</label>
+                                    <input type="text" class="form-control" id="newsImg">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">বিস্তারিত</label>
+                                    <textarea class="form-control" id="newsDesc" rows="3"></textarea>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button id="btnCancelEditNews" class="btn btn-secondary d-none me-2">বাতিল</button>
+                                    <button id="btnPublishNews" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>পাবলিশ করুন</button>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">তারিখ</label>
-                                <input type="date" class="form-control" id="newsDate">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">ছবির URL</label>
-                                <input type="text" class="form-control" id="newsImg">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">বিস্তারিত</label>
-                                <textarea class="form-control" id="newsDesc" rows="5"></textarea>
-                            </div>
-                            <div class="col-12 text-end">
-                                <button id="btnPublishNews" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>পাবলিশ করুন</button>
-                            </div>
+                        </div>
+
+                        <!-- List -->
+                        <h6 class="mb-3">প্রকাশিত নিউজ তালিকা</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%;">তারিখ</th>
+                                        <th style="width: 25%;">শিরোনাম</th>
+                                        <th style="width: 40%;">বিস্তারিত</th>
+                                        <th style="width: 20%;">অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="newsTableBody">
+                                    <!-- Dynamic News -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -408,19 +438,24 @@
                     </div>
                 </div>
 
-                <!-- About Us Section -->
+                <!-- About Us Section (Updated with Edit/Delete) -->
                 <div id="about" class="page-section fade-in d-none">
                     <div class="row">
                         <!-- Team Members -->
                         <div class="col-md-6">
                             <div class="card p-4 h-100">
-                                <h5 class="mb-3">টিম মেম্বার (চালিকাশক্তি) যুক্ত করুন</h5>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamName" placeholder="নাম"></div>
-                                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamRole" placeholder="পদবী"></div>
-                                    <div class="col-12"><input type="text" class="form-control form-control-sm" id="teamImg" placeholder="ছবির URL"></div>
-                                    <div class="col-12"><textarea class="form-control form-control-sm" id="teamBio" placeholder="সংক্ষিপ্ত বর্ণনা" rows="2"></textarea></div>
-                                    <div class="col-12 text-end"><button id="btnAddTeam" class="btn btn-sm btn-success">যুক্ত করুন</button></div>
+                                <h5 class="mb-3" id="teamFormTitle">টিম মেম্বার যুক্ত করুন</h5>
+                                <div class="card bg-body-tertiary p-2 mb-3">
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamName" placeholder="নাম"></div>
+                                        <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamRole" placeholder="পদবী"></div>
+                                        <div class="col-12"><input type="text" class="form-control form-control-sm" id="teamImg" placeholder="ছবির URL"></div>
+                                        <div class="col-12"><textarea class="form-control form-control-sm" id="teamBio" placeholder="সংক্ষিপ্ত বর্ণনা" rows="2"></textarea></div>
+                                        <div class="col-12 text-end">
+                                            <button id="btnCancelEditTeam" class="btn btn-sm btn-secondary d-none me-1">বাতিল</button>
+                                            <button id="btnAddTeam" class="btn btn-sm btn-success">যুক্ত করুন</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <hr>
                                 <h6 class="text-muted">টিম লিস্ট</h6>
@@ -430,12 +465,13 @@
                             </div>
                         </div>
                         
-                        <!-- Partners -->
+                        <!-- Partners (Updated with Edit/Delete) -->
                         <div class="col-md-6">
                             <div class="card p-4 h-100">
-                                <h5 class="mb-3">পার্টনার লোগো যুক্ত করুন</h5>
+                                <h5 class="mb-3" id="partnerFormTitle">পার্টনার লোগো যুক্ত করুন</h5>
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control" id="partnerLogoUrl" placeholder="লোগো URL">
+                                    <button class="btn btn-secondary d-none" type="button" id="btnCancelEditPartner">X</button>
                                     <button class="btn btn-success" type="button" id="btnAddPartner">যুক্ত করুন</button>
                                 </div>
                                 <hr>
@@ -484,7 +520,7 @@
         // Import Firebase Functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnKQr2k2ZWnPlEZiJtMDewv6z3Z7p3kiU",
@@ -505,6 +541,11 @@
         const loginSection = document.getElementById('loginSection');
         const mainApp = document.getElementById('mainApp');
         const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // State Variables for Edit Mode
+        let editingNewsId = null;
+        let editingTeamId = null;
+        let editingPartnerId = null;
 
         // --- AUTH OBSERVER (Check if user is logged in) ---
         onAuthStateChanged(auth, (user) => {
@@ -568,7 +609,7 @@
 
             // Load Initial Data
             loadDashboardData();
-            loadGeneralSettings(); // Load existing general settings
+            loadGeneralSettings();
         }
 
         // --- FIRESTORE FUNCTIONS ---
@@ -590,7 +631,7 @@
             }
         }
 
-        // 2. Load & Save General Settings (Fix: Path settings/siteConfig)
+        // 2. Load & Save General Settings
         async function loadGeneralSettings() {
             try {
                 const docRef = doc(db, "settings", "siteConfig");
@@ -619,7 +660,6 @@
             const b3 = document.getElementById('banner3').value;
             const tickerRaw = document.getElementById('newsTickerInput').value;
             
-            // Convert comma separated string to array and trim whitespace
             const tickerArray = tickerRaw.split(',').map(item => item.trim()).filter(item => item);
 
             try {
@@ -636,7 +676,38 @@
             }
         });
 
-        // 3. Publish News (Collection: 'news')
+        // 3. NEWS MANAGEMENT (Add/Edit/List/Delete)
+        
+        async function loadNewsList() {
+            const tbody = document.getElementById('newsTableBody');
+            tbody.innerHTML = '';
+            try {
+                const snap = await getDocs(collection(db, "news"));
+                if(snap.empty) {
+                     tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">কোন নিউজ পাওয়া যায়নি</td></tr>';
+                     return;
+                }
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const tr = document.createElement('tr');
+                    // Store data in a way we can retrieve for editing without re-fetching
+                    const dataStr = encodeURIComponent(JSON.stringify(d));
+                    
+                    tr.innerHTML = `
+                        <td>${d.date || '-'}</td>
+                        <td>${d.title}</td>
+                        <td><small>${d.content ? d.content.substring(0, 50) + '...' : ''}</small></td>
+                        <td>
+                            <span class="badge bg-warning text-dark action-btn" onclick="editNews('${doc.id}', '${dataStr}')"><i class="fas fa-edit"></i></span>
+                            <span class="badge bg-danger action-btn" onclick="deleteDocById('news', '${doc.id}')"><i class="fas fa-trash"></i></span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        // Add / Update News Button
         document.getElementById('btnPublishNews').addEventListener('click', async () => {
             const title = document.getElementById('newsTitle').value;
             const date = document.getElementById('newsDate').value;
@@ -646,34 +717,73 @@
             if(!title) return alert("শিরোনাম দিন!");
 
             try {
-                await addDoc(collection(db, "news"), {
-                    title: title,
-                    date: date,
-                    imageUrl: img,
-                    content: desc,
-                    createdAt: new Date()
-                });
-                alert("নিউজ পাবলিশ হয়েছে!");
-                document.getElementById('newsTitle').value = "";
-                document.getElementById('newsDesc').value = "";
+                if(editingNewsId) {
+                    // Update
+                    await updateDoc(doc(db, "news", editingNewsId), {
+                        title: title, date: date, imageUrl: img, content: desc, updatedAt: new Date()
+                    });
+                    alert("নিউজ আপডেট হয়েছে!");
+                    resetNewsForm();
+                } else {
+                    // Add
+                    await addDoc(collection(db, "news"), {
+                        title: title, date: date, imageUrl: img, content: desc, createdAt: new Date()
+                    });
+                    alert("নিউজ পাবলিশ হয়েছে!");
+                    document.getElementById('newsTitle').value = "";
+                    document.getElementById('newsDate').value = "";
+                    document.getElementById('newsImg').value = "";
+                    document.getElementById('newsDesc').value = "";
+                }
+                loadNewsList();
             } catch (e) {
                 alert("এরর: " + e.message);
             }
         });
 
-        // 4. Load User List (Collection: 'users')
+        // Edit News Logic
+        window.editNews = (id, dataStr) => {
+            const data = JSON.parse(decodeURIComponent(dataStr));
+            editingNewsId = id;
+            document.getElementById('newsTitle').value = data.title || '';
+            document.getElementById('newsDate').value = data.date || '';
+            document.getElementById('newsImg').value = data.imageUrl || '';
+            document.getElementById('newsDesc').value = data.content || '';
+            
+            document.getElementById('newsFormTitle').innerText = "নিউজ আপডেট করুন";
+            document.getElementById('btnPublishNews').innerText = "আপডেট করুন";
+            document.getElementById('btnPublishNews').classList.replace('btn-primary', 'btn-warning');
+            document.getElementById('btnCancelEditNews').classList.remove('d-none');
+            window.scrollTo(0, 0);
+        };
+
+        // Cancel News Edit
+        document.getElementById('btnCancelEditNews').addEventListener('click', resetNewsForm);
+
+        function resetNewsForm() {
+            editingNewsId = null;
+            document.getElementById('newsTitle').value = "";
+            document.getElementById('newsDate').value = "";
+            document.getElementById('newsImg').value = "";
+            document.getElementById('newsDesc').value = "";
+            
+            document.getElementById('newsFormTitle').innerText = "নতুন নিউজ পাবলিশ করুন";
+            document.getElementById('btnPublishNews').innerHTML = '<i class="fas fa-paper-plane me-2"></i>পাবলিশ করুন';
+            document.getElementById('btnPublishNews').classList.replace('btn-warning', 'btn-primary');
+            document.getElementById('btnCancelEditNews').classList.add('d-none');
+        }
+
+        // 4. Load User List
         async function loadUserList() {
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';
             
             try {
                 const querySnapshot = await getDocs(collection(db, "users"));
-                
                 if(querySnapshot.empty) {
                     document.getElementById('noUsersMsg').classList.remove('d-none');
                     return;
                 }
-                
                 document.getElementById('noUsersMsg').classList.add('d-none');
 
                 querySnapshot.forEach((doc) => {
@@ -688,7 +798,6 @@
                     tbody.innerHTML += row;
                 });
             } catch (e) {
-                console.error("Error loading users:", e);
                 tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">ডাটা লোড করা যায়নি (Firestore Rules চেক করুন)</td></tr>`;
             }
         }
@@ -712,7 +821,7 @@
             }
         });
 
-        // 6. About Us - Team Members Logic
+        // 6. About Us - Team Members Logic (Add/Edit/Delete)
         const teamList = document.getElementById('teamList');
         
         async function loadTeamMembers() {
@@ -720,6 +829,7 @@
             const snap = await getDocs(collection(db, "team_members"));
             snap.forEach(doc => {
                 const d = doc.data();
+                const dataStr = encodeURIComponent(JSON.stringify(d));
                 const li = document.createElement('li');
                 li.className = 'list-group-item d-flex justify-content-between align-items-center';
                 li.innerHTML = `
@@ -730,7 +840,10 @@
                             <small class="text-muted">${d.role}</small>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDocById('team_members', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                    <div>
+                        <button class="btn btn-sm btn-outline-warning me-1" onclick="editTeam('${doc.id}', '${dataStr}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDocById('team_members', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
                 `;
                 teamList.appendChild(li);
             });
@@ -743,15 +856,53 @@
             const bio = document.getElementById('teamBio').value;
             
             if(!name) return alert("নাম দিন");
-            await addDoc(collection(db, "team_members"), { name, role, image: img, bio });
-            alert("যুক্ত হয়েছে!");
-            loadTeamMembers();
-            // Clear inputs
-            document.getElementById('teamName').value = '';
-            document.getElementById('teamRole').value = '';
+
+            try {
+                if(editingTeamId) {
+                    await updateDoc(doc(db, "team_members", editingTeamId), { name, role, image: img, bio });
+                    alert("আপডেট হয়েছে!");
+                    resetTeamForm();
+                } else {
+                    await addDoc(collection(db, "team_members"), { name, role, image: img, bio });
+                    alert("যুক্ত হয়েছে!");
+                    document.getElementById('teamName').value = '';
+                    document.getElementById('teamRole').value = '';
+                    document.getElementById('teamImg').value = '';
+                    document.getElementById('teamBio').value = '';
+                }
+                loadTeamMembers();
+            } catch(e) { alert(e.message); }
         });
 
-        // 7. About Us - Partners Logic
+        window.editTeam = (id, dataStr) => {
+            const data = JSON.parse(decodeURIComponent(dataStr));
+            editingTeamId = id;
+            document.getElementById('teamName').value = data.name || '';
+            document.getElementById('teamRole').value = data.role || '';
+            document.getElementById('teamImg').value = data.image || '';
+            document.getElementById('teamBio').value = data.bio || '';
+
+            document.getElementById('teamFormTitle').innerText = "মেম্বার আপডেট করুন";
+            document.getElementById('btnAddTeam').innerText = "আপডেট";
+            document.getElementById('btnAddTeam').classList.replace('btn-success', 'btn-warning');
+            document.getElementById('btnCancelEditTeam').classList.remove('d-none');
+        };
+
+        document.getElementById('btnCancelEditTeam').addEventListener('click', resetTeamForm);
+
+        function resetTeamForm() {
+            editingTeamId = null;
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamRole').value = '';
+            document.getElementById('teamImg').value = '';
+            document.getElementById('teamBio').value = '';
+            document.getElementById('teamFormTitle').innerText = "টিম মেম্বার যুক্ত করুন";
+            document.getElementById('btnAddTeam').innerText = "যুক্ত করুন";
+            document.getElementById('btnAddTeam').classList.replace('btn-warning', 'btn-success');
+            document.getElementById('btnCancelEditTeam').classList.add('d-none');
+        }
+
+        // 7. About Us - Partners Logic (Add/Edit/Delete)
         const partnerList = document.getElementById('partnerList');
         
         async function loadPartners() {
@@ -759,10 +910,11 @@
             const snap = await getDocs(collection(db, "partners"));
             snap.forEach(doc => {
                 const d = doc.data();
+                const dataStr = encodeURIComponent(JSON.stringify(d));
                 const div = document.createElement('div');
                 div.className = 'position-relative d-inline-block border p-1 rounded';
                 div.innerHTML = `
-                    <img src="${d.imageUrl}" style="height: 40px;">
+                    <img src="${d.imageUrl}" style="height: 40px; cursor:pointer;" onclick="editPartner('${doc.id}', '${dataStr}')" title="এডিট করতে ক্লিক করুন">
                     <button class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border-0" onclick="deleteDocById('partners', '${doc.id}')">x</button>
                 `;
                 partnerList.appendChild(div);
@@ -772,11 +924,42 @@
         document.getElementById('btnAddPartner').addEventListener('click', async () => {
             const url = document.getElementById('partnerLogoUrl').value;
             if(!url) return alert("URL দিন");
-            await addDoc(collection(db, "partners"), { imageUrl: url });
-            alert("যুক্ত হয়েছে!");
-            loadPartners();
-            document.getElementById('partnerLogoUrl').value = '';
+
+            try {
+                if(editingPartnerId) {
+                    await updateDoc(doc(db, "partners", editingPartnerId), { imageUrl: url });
+                    alert("আপডেট হয়েছে!");
+                    resetPartnerForm();
+                } else {
+                    await addDoc(collection(db, "partners"), { imageUrl: url });
+                    alert("যুক্ত হয়েছে!");
+                    document.getElementById('partnerLogoUrl').value = '';
+                }
+                loadPartners();
+            } catch(e) { alert(e.message); }
         });
+
+        window.editPartner = (id, dataStr) => {
+            const data = JSON.parse(decodeURIComponent(dataStr));
+            editingPartnerId = id;
+            document.getElementById('partnerLogoUrl').value = data.imageUrl || '';
+            
+            document.getElementById('partnerFormTitle').innerText = "লোগো আপডেট করুন";
+            document.getElementById('btnAddPartner').innerText = "আপডেট";
+            document.getElementById('btnAddPartner').classList.replace('btn-success', 'btn-warning');
+            document.getElementById('btnCancelEditPartner').classList.remove('d-none');
+        };
+
+        document.getElementById('btnCancelEditPartner').addEventListener('click', resetPartnerForm);
+
+        function resetPartnerForm() {
+            editingPartnerId = null;
+            document.getElementById('partnerLogoUrl').value = '';
+            document.getElementById('partnerFormTitle').innerText = "পার্টনার লোগো যুক্ত করুন";
+            document.getElementById('btnAddPartner').innerText = "যুক্ত করুন";
+            document.getElementById('btnAddPartner').classList.replace('btn-warning', 'btn-success');
+            document.getElementById('btnCancelEditPartner').classList.add('d-none');
+        }
 
         // 8. Contact Info Logic
         async function loadContactInfo() {
@@ -806,12 +989,14 @@
                 await deleteDoc(doc(db, collectionName, docId));
                 if(collectionName === 'team_members') loadTeamMembers();
                 if(collectionName === 'partners') loadPartners();
+                if(collectionName === 'news') loadNewsList();
             }
         };
 
         // Expose load functions to global for 'showPage' to trigger
         window.loadAboutData = () => { loadTeamMembers(); loadPartners(); };
         window.loadContactData = loadContactInfo;
+        window.loadNewsData = loadNewsList;
 
     </script>
 
@@ -851,6 +1036,7 @@
             if(pageId === 'userlist' && window.loadUserListRef) window.loadUserListRef();
             if(pageId === 'about' && window.loadAboutData) window.loadAboutData();
             if(pageId === 'contact' && window.loadContactData) window.loadContactData();
+            if(pageId === 'updates' && window.loadNewsData) window.loadNewsData();
         }
 
         // --- Dark Mode Logic ---
@@ -871,266 +1057,6 @@
                 btn.classList.replace('btn-outline-warning', 'btn-outline-secondary');
             }
         }
-    </script>
-</body>
-</html>ById('newsTickerContent');
-            let tickerHTML = '';
-            defaultTickerNews.forEach(newsItem => {
-                tickerHTML += `<span class="ticker-item">${newsItem}</span>`;
-            });
-            tickerContentDiv.innerHTML = tickerHTML;
-        }
-
-        // Call fetch function
-        fetchSiteSettings();
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // --- LOADER LOGIC ---
-            const preloader = document.getElementById('preloader');
-            window.addEventListener('load', () => {
-                // Fade out the loader
-                preloader.style.opacity = '0';
-                preloader.style.visibility = 'hidden';
-                // Allow removing it from DOM after transition
-                setTimeout(() => {
-                    preloader.style.display = 'none';
-                }, 500);
-            });
-            
-            // --- BANNER SLIDER LOGIC ---
-            function initializeBanners() {
-                const defaultBanners = [
-                    "https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-                    "https://images.unsplash.com/photo-1584634731339-252c581abfc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-                    "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
-                ];
-                // Try LocalStorage first (or could be moved to Firebase later)
-                const savedBanners = JSON.parse(localStorage.getItem('siteBanners')) || defaultBanners;
-                
-                const bannerSlides = document.querySelectorAll('.banner-slide');
-                bannerSlides.forEach((slide, index) => {
-                    if(savedBanners[index]) {
-                        slide.style.backgroundImage = `url('${savedBanners[index]}')`;
-                    }
-                });
-            }
-            initializeBanners();
-
-            // --- LOGIN / PROFILE LOGIC ---
-            const loginBtn = document.getElementById('loginBtn');
-            const profileContainer = document.getElementById('profileContainer');
-            const profileDialog = document.getElementById('profileDialog');
-            const logoutItem = document.getElementById('logout-button-item');
-
-            // Check Login Status (Simulated)
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
-            if (isLoggedIn) {
-                // Hide Login Button
-                loginBtn.style.display = 'none';
-                // Show Profile Icon
-                profileContainer.style.display = 'block';
-                // Show Sidebar Logout
-                document.body.classList.add('user-logged-in');
-
-                // Trigger Dialog Box Animation
-                setTimeout(() => {
-                    profileDialog.classList.add('show');
-                }, 1000); // 1 sec delay after load
-
-                // Hide after 3 seconds
-                setTimeout(() => {
-                    profileDialog.classList.remove('show');
-                }, 4000); // 1s delay + 3s show time
-            } else {
-                loginBtn.style.display = 'inline-flex';
-                profileContainer.style.display = 'none';
-            }
-
-            // Note: In a real app, clicking logout would set 'isLoggedIn' to false.
-            logoutItem.addEventListener('click', (e) => {
-                localStorage.setItem('isLoggedIn', 'false');
-                window.location.reload();
-            });
-
-
-            // --- Banner Slider Animation ---
-            const bannerSlides = document.querySelectorAll('.banner-slide');
-            const bannerDots = document.querySelectorAll('.banner-dot');
-            let currentSlide = 0;
-            function showSlide(index) {
-                bannerSlides.forEach(slide => slide.classList.remove('active'));
-                bannerDots.forEach(dot => dot.classList.remove('active'));
-                bannerSlides[index].classList.add('active');
-                bannerDots[index].classList.add('active');
-                currentSlide = index;
-            }
-            function nextSlide() {
-                let nextIndex = (currentSlide + 1) % bannerSlides.length;
-                showSlide(nextIndex);
-            }
-            setInterval(nextSlide, 5000);
-            bannerDots.forEach(dot => {
-                dot.addEventListener('click', () => {
-                    const index = parseInt(dot.getAttribute('data-index'));
-                    showSlide(index);
-                });
-            });
-
-            // --- EMERGENCY SECTION LOGIC ---
-            const emergencyGrid = document.getElementById('emergencyGrid');
-            
-            function loadIndexEmergencyCards() {
-                const cards = JSON.parse(localStorage.getItem('emergencyCards')) || [];
-                const now = new Date().getTime();
-                const validCards = cards.filter(card => new Date(card.deletionTime).getTime() > now);
-                const cardsToShow = validCards.slice(0, 10);
-                
-                emergencyGrid.innerHTML = '';
-                
-                if (cardsToShow.length === 0) {
-                    emergencyGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">বর্তমানে কোনো জরুরি রক্তের প্রয়োজন নেই।</p>';
-                    return;
-                }
-
-                cardsToShow.forEach(renderIndexEmergencyCard);
-            }
-
-            function renderIndexEmergencyCard(emData) {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'emergency-card';
-                
-                const creatorName = emData.creatorName || "অজানা";
-                
-                const divisionMap = {
-                    "barishal": "বরিশাল",
-                    "chattogram": "চট্টগ্রাম",
-                    "dhaka": "ঢাকা",
-                    "khulna": "খুলনা",
-                    "mymensingh": "ময়মনসিংহ",
-                    "rajshahi": "রাজশাহী",
-                    "rangpur": "রংপুর",
-                    "sylhet": "সিলেট"
-                };
-                const divName = divisionMap[emData.division] || emData.division;
-
-                const postedTime = "এইমাত্র"; 
-
-                cardDiv.innerHTML = `
-                    <div class="e-card-top">
-                        <div class="blood-group-badge">${emData.bloodGroup}</div>
-                        <div class="creator-info">
-                            <span class="creator-name"><i class="fas fa-user-circle"></i> ${creatorName}</span>
-                        </div>
-                        <div class="e-card-tags">
-                            <span class="posted-time">${postedTime}</span>
-                            <span class="urgent-tag">Urgent</span>
-                        </div>
-                    </div>
-                    <div class="e-details">
-                        <h4>${emData.location}</h4>
-                        <p><i class="fas fa-user"></i> রোগী: ${emData.patientName}</p>
-                        <p><i class="fas fa-notes-medical"></i> সমস্যা: ${emData.problem}</p>
-                        <p><i class="fas fa-map-marked-alt"></i> ঠিকানা: ${emData.upazilaText}, ${emData.districtText}, ${divName}</p>
-                    </div>
-                    <div class="e-actions">
-                        <button class="btn btn-sm btn-call" onclick="window.location.href='tel:${emData.mobile}'"><i class="fas fa-phone-alt"></i> কল করুন</button>
-                        <button class="btn btn-sm btn-outline">ডিটেইলস</button>
-                    </div>
-                `;
-                emergencyGrid.prepend(cardDiv);
-            }
-
-            loadIndexEmergencyCards();
-            
-            // --- UPDATES SECTION LOGIC ---
-            const updatesGrid = document.getElementById('updatesGrid');
-            const updatesData = [];
-
-            function createUpdateCardHTML(data) {
-                const posted = "কিছুক্ষণ আগে"; 
-                const imageHTML = data.imageUrl ? `<div class="update-card-image"><img src="${data.imageUrl}" alt="${data.title}"></div>` : '';
-                return `<div class="update-card">${imageHTML}<div class="update-card-content"><h3>${data.title}</h3><p>${data.content}</p><div class="update-card-timestamp">${posted}</div></div></div>`;
-            }
-
-            function renderUpdates() {
-                if (updatesData.length === 0) { 
-                    updatesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">কোন নতুন আপডেট নেই।</p>'; 
-                    return; 
-                }
-                let content = '';
-                updatesData.forEach(update => { content += createUpdateCardHTML(update); });
-                updatesGrid.innerHTML = content;
-            }
-            renderUpdates();
-
-            // --- Sidebar and Theme Logic ---
-            const sidebar = document.querySelector(".sidebar");
-            const backdrop = document.querySelector(".sidebar-backdrop");
-            const openMenuBtn = document.querySelector(".sidebar-menu-button-header");
-            const closeMenuBtn = document.querySelector(".sidebar-back-button");
-
-            const openSidebar = () => {
-                sidebar.classList.add("is-open");
-                backdrop.classList.add("is-open");
-            };
-            const closeSidebar = () => {
-                sidebar.classList.remove("is-open");
-                backdrop.classList.remove("is-open");
-            };
-
-            openMenuBtn.addEventListener("click", (e) => { e.preventDefault(); openSidebar(); });
-            closeMenuBtn.addEventListener("click", (e) => { e.preventDefault(); closeSidebar(); });
-            backdrop.addEventListener("click", (e) => { e.preventDefault(); closeSidebar(); });
-            
-            const themeToggleButton = document.getElementById('theme-toggle');
-            const body = document.body;
-
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                body.classList.add('dark-mode');
-            }
-
-            themeToggleButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                body.classList.toggle('dark-mode');
-                
-                if (body.classList.contains('dark-mode')) {
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    localStorage.setItem('theme', 'light');
-                }
-            });
-
-            // --- Dropdown Menu Script ---
-            const toggleDropdown = (dropdown, menu, isOpen) => {
-              dropdown.classList.toggle("open", isOpen);
-              menu.style.height = isOpen ? `${menu.scrollHeight}px` : "0";
-            };
-
-            const closeAllDropdowns = () => {
-              document.querySelectorAll(".dropdown-container.open").forEach((openDropdown) => {
-                toggleDropdown(openDropdown, openDropdown.querySelector(".dropdown-menu"), false);
-              });
-            };
-            
-            document.querySelectorAll(".dropdown-toggle").forEach((dropdownToggle) => {
-              dropdownToggle.addEventListener("click", (e) => {
-                e.preventDefault();
-                const dropdown = dropdownToggle.closest(".dropdown-container");
-                const menu = dropdown.querySelector(".dropdown-menu");
-                const isOpen = dropdown.classList.contains("open");
-                
-                if (!sidebar.classList.contains('collapsed')) {
-                    closeAllDropdowns();
-                }
-                toggleDropdown(dropdown, menu, !isOpen);
-              });
-            });
-        });
     </script>
 </body>
 </html>

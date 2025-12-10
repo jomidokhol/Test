@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="bn" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Admin Panel</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --sidebar-width: 260px;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Poppins', 'Hind Siliguri', sans-serif;
+            background-color: var(--bs-body-bg);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* --- Login Screen Styling --- */
+        .login-wrapper {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000;
+            transition: all 0.5s ease;
+        }
+        .login-card {
+            width: 100%; max-width: 400px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideUp 0.5s ease;
+        }
+
+        /* --- Layout Structure --- */
+        .d-flex-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            align-items: stretch;
+            position: relative;
+        }
+
+        /* --- Sidebar --- */
+        #sidebar {
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background: #2c3e50;
+            color: #fff;
+            height: 100vh;
+            transition: all var(--transition-speed);
+            z-index: 1050;
+            position: fixed;
+            top: 0; left: 0;
+            overflow-y: auto;
+            margin-left: calc(var(--sidebar-width) * -1); /* Hidden initially */
+        }
+        
+        #sidebar.active {
+            margin-left: 0; /* Show sidebar */
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #sidebar ul.components {
+            padding: 20px 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        #sidebar ul li a {
+            padding: 15px 25px;
+            font-size: 0.95rem;
+            display: block;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 30px;
+        }
+
+        /* --- Content Area --- */
+        #content {
+            width: 100%;
+            margin-left: 0;
+            transition: all var(--transition-speed);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); 
+            z-index: 1040;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.show { display: block; }
+
+        /* --- Top Navigation Bar --- */
+        .navbar {
+            padding: 15px 25px;
+            background: var(--bs-body-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .main-content {
+            padding: 30px;
+            flex: 1;
+        }
+
+        /* --- Cards & Tables --- */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            transition: transform 0.2s;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card { border-left: 5px solid; }
+
+        /* --- Animations --- */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Loading Spinner */
+        #loadingSpinner {
+            display: none;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 3000;
+        }
+
+        /* Small item styling for list */
+        .list-item-img {
+            width: 40px; height: 40px; object-fit: cover; border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- 1. Login Screen -->
+    <div id="loginSection" class="login-wrapper">
+        <div class="card login-card p-5 bg-white text-dark">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 24px;">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <h3>এডমিন প্যানেল</h3>
+                <p class="text-muted small">এডমিন নিরাপদ লগইন</p>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="adminEmail" placeholder="name@example.com">
+                <label for="adminEmail">ইমেইল এড্রেস</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" id="adminPass" placeholder="password">
+                <label for="adminPass">পাসওয়ার্ড</label>
+            </div>
+            <button id="btnLogin" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">প্রবেশ করুন</button>
+            <small class="text-danger text-center mt-3 d-block" id="loginError"></small>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- 2. Main Application Wrapper -->
+    <div class="d-flex-wrapper d-none" id="mainApp">
+        
+        <!-- SIDEBAR MENU -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-rocket me-2"></i> সাইট মেনু
+            </div>
+            <ul class="components">
+                <li><a href="#" onclick="showPage('dashboard', this)" class="active-link"><i class="fas fa-home me-3"></i>ড্যাশবোর্ড</a></li>
+                <li><a href="#" onclick="showPage('general', this)"><i class="fas fa-sliders-h me-3"></i>হোম কনফিগার</a></li>
+                <li><a href="#" onclick="showPage('userlist', this)"><i class="fas fa-users me-3"></i>ইউজার লিস্ট</a></li>
+                <li><a href="#" onclick="showPage('about', this)"><i class="fas fa-info-circle me-3"></i>আমাদের সম্পর্কে</a></li>
+                <li><a href="#" onclick="showPage('contact', this)"><i class="fas fa-address-card me-3"></i>যোগাযোগ তথ্য</a></li>
+                <li><a href="#" onclick="showPage('updates', this)"><i class="fas fa-bullhorn me-3"></i>নিউজ আপডেট</a></li>
+                <li><a href="#" onclick="showPage('settings', this)"><i class="fas fa-cog me-3"></i>সেটিংস</a></li>
+            </ul>
+            <div class="text-center mt-5">
+                <button id="btnLogout" class="btn btn-danger btn-sm w-75 rounded-pill"><i class="fas fa-sign-out-alt me-2"></i>লগ আউট</button>
+            </div>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <div id="content">
+            
+            <!-- TOP MENU BAR -->
+            <nav class="navbar navbar-expand-lg sticky-top">
+                <div class="container-fluid">
+                    <!-- Toggle Button (Hamburger) -->
+                    <button type="button" id="sidebarCollapse" class="btn btn-primary shadow-sm" onclick="toggleSidebar()">
+                        <i class="fas fa-bars me-1"></i> <span class="d-none d-sm-inline">মেনু</span>
+                    </button>
+                    
+                    <div class="d-flex align-items-center ms-auto">
+                        <button class="btn btn-outline-secondary border-0 me-3" onclick="toggleTheme()" id="themeBtn" title="Change Theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-body" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://ui-avatars.com/api/?name=Admin&background=4e73df&color=fff" alt="" width="40" height="40" class="rounded-circle me-2 border">
+                                <span class="fw-bold small d-none d-sm-inline" id="displayUsername">Admin</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><a class="dropdown-item" href="#" onclick="showPage('settings')"><i class="fas fa-user me-2"></i>প্রোফাইল</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Dynamic Content -->
+            <div class="main-content">
+                
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="page-section fade-in">
+                    <h4 class="mb-4 text-muted border-bottom pb-2">ড্যাশবোর্ড ওভারভিউ</h4>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card stat-card p-4 border-primary bg-body-tertiary">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted text-uppercase mb-2">মোট ইউজার</h6>
+                                        <h2 class="mb-0 fw-bold" id="totalUsersCount">0</h2>
+                                    </div>
+                                    <div class="fs-1 text-primary opacity-25"><i class="fas fa-users"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card p-4 border-success bg-body-tertiary">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted text-uppercase mb-2">সর্বমোট নিউজ</h6>
+                                        <h2 class="mb-0 fw-bold" id="totalNewsCount">0</h2>
+                                    </div>
+                                    <div class="fs-1 text-success opacity-25"><i class="fas fa-newspaper"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card p-4 border-warning bg-body-tertiary">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted text-uppercase mb-2">টিম মেম্বার</h6>
+                                        <h2 class="mb-0 fw-bold" id="totalTeamCount">0</h2>
+                                    </div>
+                                    <div class="fs-1 text-warning opacity-25"><i class="fas fa-user-tie"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Settings Section -->
+                <div id="general" class="page-section fade-in d-none">
+                    <div class="card p-4">
+                        <h5 class="card-title mb-4 border-bottom pb-2">হোম পেজ ও সাধারণ সেটিংস</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">সাইট নাম (Site Name)</label>
+                                <input type="text" class="form-control" id="siteName">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">সাইট লোগো URL</label>
+                                <input type="text" class="form-control" id="siteLogoUrl">
+                            </div>
+                            
+                            <h6 class="mt-4 text-muted">স্লাইডার ব্যানার</h6>
+                            <div class="col-md-4">
+                                <label class="form-label">ব্যানার ১ URL</label>
+                                <input type="text" class="form-control" id="banner1">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">ব্যানার ২ URL</label>
+                                <input type="text" class="form-control" id="banner2">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">ব্যানার ৩ URL</label>
+                                <input type="text" class="form-control" id="banner3">
+                            </div>
+
+                            <h6 class="mt-4 text-muted">ব্রেকিং নিউজ টিকার</h6>
+                            <div class="col-12">
+                                <label class="form-label">সংবাদসমূহ (কমা ',' দিয়ে আলাদা করুন)</label>
+                                <textarea class="form-control" id="newsTickerInput" rows="3" placeholder="রক্তদাতারা যোগ দিচ্ছেন..., জরুরি রক্তের প্রয়োজন..."></textarea>
+                            </div>
+
+                            <button id="btnSaveGeneral" class="btn btn-primary mt-3 w-auto ms-auto">সেভ করুন</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User List Section -->
+                <div id="userlist" class="page-section fade-in d-none">
+                    <div class="card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">রেজিস্টার্ড ইউজার (Firestore)</h5>
+                            <button id="btnRefreshUsers" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync"></i> রিফ্রেশ</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ইমেইল / নাম</th>
+                                        <th>ফোন</th>
+                                        <th>UID</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- Data will be loaded here from Firebase -->
+                                </tbody>
+                            </table>
+                            <div id="noUsersMsg" class="text-center text-muted py-3 d-none">কোন ইউজার পাওয়া যায়নি</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Updates Section -->
+                <div id="updates" class="page-section fade-in d-none">
+                    <div class="card p-4">
+                        <h5 class="mb-4">নতুন নিউজ পাবলিশ করুন</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">শিরোনাম</label>
+                                <input type="text" class="form-control" id="newsTitle">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">তারিখ</label>
+                                <input type="date" class="form-control" id="newsDate">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">ছবির URL</label>
+                                <input type="text" class="form-control" id="newsImg">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">বিস্তারিত</label>
+                                <textarea class="form-control" id="newsDesc" rows="5"></textarea>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button id="btnPublishNews" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>পাবলিশ করুন</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings" class="page-section fade-in d-none">
+                    <div class="card p-4" style="max-width: 500px; margin: 0 auto;">
+                        <h5 class="mb-4 text-primary"><i class="fas fa-user-shield me-2"></i>পাসওয়ার্ড পরিবর্তন</h5>
+                        <div class="alert alert-info small">বর্তমানে লগইন করা: <span id="currentEmailDisplay"></span></div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">নতুন পাসওয়ার্ড</label>
+                            <input type="password" class="form-control" id="newFirebasePass">
+                        </div>
+                        <button id="btnUpdatePass" class="btn btn-warning w-100 fw-bold">পাসওয়ার্ড আপডেট করুন</button>
+                    </div>
+                </div>
+
+                <!-- About Us Section -->
+                <div id="about" class="page-section fade-in d-none">
+                    <div class="row">
+                        <!-- Team Members -->
+                        <div class="col-md-6">
+                            <div class="card p-4 h-100">
+                                <h5 class="mb-3">টিম মেম্বার (চালিকাশক্তি) যুক্ত করুন</h5>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamName" placeholder="নাম"></div>
+                                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamRole" placeholder="পদবী"></div>
+                                    <div class="col-12"><input type="text" class="form-control form-control-sm" id="teamImg" placeholder="ছবির URL"></div>
+                                    <div class="col-12"><textarea class="form-control form-control-sm" id="teamBio" placeholder="সংক্ষিপ্ত বর্ণনা" rows="2"></textarea></div>
+                                    <div class="col-12 text-end"><button id="btnAddTeam" class="btn btn-sm btn-success">যুক্ত করুন</button></div>
+                                </div>
+                                <hr>
+                                <h6 class="text-muted">টিম লিস্ট</h6>
+                                <ul class="list-group list-group-flush" id="teamList">
+                                    <!-- Dynamic List -->
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Partners -->
+                        <div class="col-md-6">
+                            <div class="card p-4 h-100">
+                                <h5 class="mb-3">পার্টনার লোগো যুক্ত করুন</h5>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="partnerLogoUrl" placeholder="লোগো URL">
+                                    <button class="btn btn-success" type="button" id="btnAddPartner">যুক্ত করুন</button>
+                                </div>
+                                <hr>
+                                <h6 class="text-muted">পার্টনার লিস্ট</h6>
+                                <div class="d-flex flex-wrap gap-2" id="partnerList">
+                                    <!-- Dynamic List -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Section -->
+                <div id="contact" class="page-section fade-in d-none">
+                    <div class="card p-4">
+                        <h5 class="mb-4">যোগাযোগের তথ্য আপডেট করুন</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">মোবাইল নম্বর</label>
+                                <input type="text" class="form-control" id="contactPhone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ইমেইল</label>
+                                <input type="text" class="form-control" id="contactEmail">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">ঠিকানা</label>
+                                <input type="text" class="form-control" id="contactAddress">
+                            </div>
+                            <div class="col-12 text-end">
+                                <button id="btnSaveContact" class="btn btn-primary">সেভ করুন</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- FIREBASE INTEGRATION -->
+    <script type="module">
+        // Import Firebase Functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnKQr2k2ZWnPlEZiJtMDewv6z3Z7p3kiU",
+            authDomain: "pacheacchi.firebaseapp.com",
+            projectId: "pacheacchi",
+            storageBucket: "pacheacchi.firebasestorage.app",
+            messagingSenderId: "679996219070",
+            appId: "1:679996219070:web:871b64fb4a5be296eac8ef",
+            measurementId: "G-M34YKMYHQ8"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const mainApp = document.getElementById('mainApp');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // --- AUTH OBSERVER (Check if user is logged in) ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                showApp(user);
+            } else {
+                // User is signed out
+                showLogin();
+            }
+        });
+
+        // --- LOGIN FUNCTION ---
+        document.getElementById('btnLogin').addEventListener('click', async () => {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            const errorMsg = document.getElementById('loginError');
+
+            if(!email || !pass) {
+                errorMsg.innerText = "দয়া করে ইমেইল এবং পাসওয়ার্ড দিন";
+                return;
+            }
+
+            loadingSpinner.style.display = 'block';
+            errorMsg.innerText = '';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                // Observer will handle the UI switch
+            } catch (error) {
+                console.error(error);
+                errorMsg.innerText = "ভুল তথ্য! অথবা পারমিশন নেই।";
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        });
+
+        // --- LOGOUT FUNCTION ---
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                alert("লগ আউট সফল হয়েছে!");
+            }).catch((error) => {
+                console.error(error);
+            });
+        });
+
+        // --- UI HELPERS ---
+        function showLogin() {
+            loginSection.classList.remove('d-none');
+            mainApp.classList.add('d-none');
+            mainApp.classList.remove('d-flex-wrapper');
+        }
+
+        function showApp(user) {
+            loginSection.classList.add('d-none');
+            mainApp.classList.remove('d-none');
+            mainApp.classList.add('d-flex-wrapper');
+            
+            document.getElementById('displayUsername').innerText = user.email.split('@')[0];
+            document.getElementById('currentEmailDisplay').innerText = user.email;
+
+            // Load Initial Data
+            loadDashboardData();
+            loadGeneralSettings(); // Load existing general settings
+        }
+
+        // --- FIRESTORE FUNCTIONS ---
+
+        // 1. Dashboard Data
+        async function loadDashboardData() {
+            try {
+                const usersSnap = await getDocs(collection(db, "users"));
+                document.getElementById('totalUsersCount').innerText = usersSnap.size;
+
+                const newsSnap = await getDocs(collection(db, "news"));
+                document.getElementById('totalNewsCount').innerText = newsSnap.size;
+                
+                const teamSnap = await getDocs(collection(db, "team_members"));
+                document.getElementById('totalTeamCount').innerText = teamSnap.size;
+
+            } catch (e) {
+                console.log("Data load error: ", e);
+            }
+        }
+
+        // 2. Load & Save General Settings (Fix: Path settings/siteConfig)
+        async function loadGeneralSettings() {
+            try {
+                const docRef = doc(db, "settings", "siteConfig");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('siteName').value = data.siteName || '';
+                    document.getElementById('siteLogoUrl').value = data.logoUrl || '';
+                    if (data.banners && Array.isArray(data.banners)) {
+                        document.getElementById('banner1').value = data.banners[0] || '';
+                        document.getElementById('banner2').value = data.banners[1] || '';
+                        document.getElementById('banner3').value = data.banners[2] || '';
+                    }
+                    if (data.newsTicker && Array.isArray(data.newsTicker)) {
+                        document.getElementById('newsTickerInput').value = data.newsTicker.join(', ');
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById('btnSaveGeneral').addEventListener('click', async () => {
+            const name = document.getElementById('siteName').value;
+            const logo = document.getElementById('siteLogoUrl').value;
+            const b1 = document.getElementById('banner1').value;
+            const b2 = document.getElementById('banner2').value;
+            const b3 = document.getElementById('banner3').value;
+            const tickerRaw = document.getElementById('newsTickerInput').value;
+            
+            // Convert comma separated string to array and trim whitespace
+            const tickerArray = tickerRaw.split(',').map(item => item.trim()).filter(item => item);
+
+            try {
+                await setDoc(doc(db, "settings", "siteConfig"), {
+                    siteName: name,
+                    logoUrl: logo,
+                    banners: [b1, b2, b3],
+                    newsTicker: tickerArray,
+                    updatedAt: new Date()
+                }, { merge: true });
+                alert("সেটিংস সেভ হয়েছে!");
+            } catch (e) {
+                alert("এরর: " + e.message);
+            }
+        });
+
+        // 3. Publish News (Collection: 'news')
+        document.getElementById('btnPublishNews').addEventListener('click', async () => {
+            const title = document.getElementById('newsTitle').value;
+            const date = document.getElementById('newsDate').value;
+            const img = document.getElementById('newsImg').value;
+            const desc = document.getElementById('newsDesc').value;
+
+            if(!title) return alert("শিরোনাম দিন!");
+
+            try {
+                await addDoc(collection(db, "news"), {
+                    title: title,
+                    date: date,
+                    imageUrl: img,
+                    content: desc,
+                    createdAt: new Date()
+                });
+                alert("নিউজ পাবলিশ হয়েছে!");
+                document.getElementById('newsTitle').value = "";
+                document.getElementById('newsDesc').value = "";
+            } catch (e) {
+                alert("এরর: " + e.message);
+            }
+        });
+
+        // 4. Load User List (Collection: 'users')
+        async function loadUserList() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                
+                if(querySnapshot.empty) {
+                    document.getElementById('noUsersMsg').classList.remove('d-none');
+                    return;
+                }
+                
+                document.getElementById('noUsersMsg').classList.add('d-none');
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = `
+                        <tr>
+                            <td>${data.email || data.name || 'Unknown'}</td>
+                            <td>${data.mobile || data.phone || 'N/A'}</td>
+                            <td><span class="badge bg-secondary">${doc.id.substring(0,8)}...</span></td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (e) {
+                console.error("Error loading users:", e);
+                tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">ডাটা লোড করা যায়নি (Firestore Rules চেক করুন)</td></tr>`;
+            }
+        }
+        document.getElementById('btnRefreshUsers').addEventListener('click', loadUserList);
+        window.loadUserListRef = loadUserList; 
+
+        // 5. Update Password
+        document.getElementById('btnUpdatePass').addEventListener('click', () => {
+            const user = auth.currentUser;
+            const newPassword = document.getElementById('newFirebasePass').value;
+
+            if (user && newPassword) {
+                updatePassword(user, newPassword).then(() => {
+                    alert("পাসওয়ার্ড পরিবর্তন সফল হয়েছে!");
+                    document.getElementById('newFirebasePass').value = '';
+                }).catch((error) => {
+                    alert("এরর: " + error.message);
+                });
+            } else {
+                alert("নতুন পাসওয়ার্ড লিখুন।");
+            }
+        });
+
+        // 6. About Us - Team Members Logic
+        const teamList = document.getElementById('teamList');
+        
+        async function loadTeamMembers() {
+            teamList.innerHTML = '';
+            const snap = await getDocs(collection(db, "team_members"));
+            snap.forEach(doc => {
+                const d = doc.data();
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${d.image || 'https://via.placeholder.com/40'}" class="list-item-img me-3">
+                        <div>
+                            <strong>${d.name}</strong><br>
+                            <small class="text-muted">${d.role}</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDocById('team_members', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                `;
+                teamList.appendChild(li);
+            });
+        }
+
+        document.getElementById('btnAddTeam').addEventListener('click', async () => {
+            const name = document.getElementById('teamName').value;
+            const role = document.getElementById('teamRole').value;
+            const img = document.getElementById('teamImg').value;
+            const bio = document.getElementById('teamBio').value;
+            
+            if(!name) return alert("নাম দিন");
+            await addDoc(collection(db, "team_members"), { name, role, image: img, bio });
+            alert("যুক্ত হয়েছে!");
+            loadTeamMembers();
+            // Clear inputs
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamRole').value = '';
+        });
+
+        // 7. About Us - Partners Logic
+        const partnerList = document.getElementById('partnerList');
+        
+        async function loadPartners() {
+            partnerList.innerHTML = '';
+            const snap = await getDocs(collection(db, "partners"));
+            snap.forEach(doc => {
+                const d = doc.data();
+                const div = document.createElement('div');
+                div.className = 'position-relative d-inline-block border p-1 rounded';
+                div.innerHTML = `
+                    <img src="${d.imageUrl}" style="height: 40px;">
+                    <button class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border-0" onclick="deleteDocById('partners', '${doc.id}')">x</button>
+                `;
+                partnerList.appendChild(div);
+            });
+        }
+
+        document.getElementById('btnAddPartner').addEventListener('click', async () => {
+            const url = document.getElementById('partnerLogoUrl').value;
+            if(!url) return alert("URL দিন");
+            await addDoc(collection(db, "partners"), { imageUrl: url });
+            alert("যুক্ত হয়েছে!");
+            loadPartners();
+            document.getElementById('partnerLogoUrl').value = '';
+        });
+
+        // 8. Contact Info Logic
+        async function loadContactInfo() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "contact"));
+                if (docSnap.exists()) {
+                    const d = docSnap.data();
+                    document.getElementById('contactPhone').value = d.phone || '';
+                    document.getElementById('contactEmail').value = d.email || '';
+                    document.getElementById('contactAddress').value = d.address || '';
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        document.getElementById('btnSaveContact').addEventListener('click', async () => {
+            const phone = document.getElementById('contactPhone').value;
+            const email = document.getElementById('contactEmail').value;
+            const address = document.getElementById('contactAddress').value;
+            
+            await setDoc(doc(db, "settings", "contact"), { phone, email, address }, { merge: true });
+            alert("সেভ হয়েছে!");
+        });
+
+        // Global Delete Function
+        window.deleteDocById = async (collectionName, docId) => {
+            if(confirm("মুছে ফেলতে চান?")) {
+                await deleteDoc(doc(db, collectionName, docId));
+                if(collectionName === 'team_members') loadTeamMembers();
+                if(collectionName === 'partners') loadPartners();
+            }
+        };
+
+        // Expose load functions to global for 'showPage' to trigger
+        window.loadAboutData = () => { loadTeamMembers(); loadPartners(); };
+        window.loadContactData = loadContactInfo;
+
+    </script>
+
+    <!-- UI Logic Script (No Firebase) -->
+    <script>
+        // --- Sidebar Logic (Desktop = Mobile) ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            
+            sidebar.classList.toggle('active');
+            
+            if(sidebar.classList.contains('active')) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        }
+
+        // --- Navigation Logic ---
+        function showPage(pageId, element) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('d-none'));
+            
+            const target = document.getElementById(pageId);
+            target.classList.remove('d-none');
+            target.classList.remove('fade-in');
+            void target.offsetWidth; // trigger reflow
+            target.classList.add('fade-in');
+
+            if(element) {
+                document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active-link'));
+                element.classList.add('active-link');
+                toggleSidebar(); // Close sidebar after click
+            }
+
+            // Trigger data load for specific pages
+            if(pageId === 'userlist' && window.loadUserListRef) window.loadUserListRef();
+            if(pageId === 'about' && window.loadAboutData) window.loadAboutData();
+            if(pageId === 'contact' && window.loadContactData) window.loadContactData();
+        }
+
+        // --- Dark Mode Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            const icon = btn.querySelector('i');
+
+            if (html.getAttribute('data-bs-theme') === 'light') {
+                html.setAttribute('data-bs-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                btn.classList.replace('btn-outline-secondary', 'btn-outline-warning');
+            } else {
+                html.setAttribute('data-bs-theme', 'light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                btn.classList.replace('btn-outline-warning', 'btn-outline-secondary');
+            }
+        }
+    </script>
+</body>
+</html>ById('newsTickerContent');
+            let tickerHTML = '';
+            defaultTickerNews.forEach(newsItem => {
+                tickerHTML += `<span class="ticker-item">${newsItem}</span>`;
+            });
+            tickerContentDiv.innerHTML = tickerHTML;
+        }
+
+        // Call fetch function
+        fetchSiteSettings();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- LOADER LOGIC ---
+            const preloader = document.getElementById('preloader');
+            window.addEventListener('load', () => {
+                // Fade out the loader
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+                // Allow removing it from DOM after transition
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500);
+            });
+            
+            // --- BANNER SLIDER LOGIC ---
+            function initializeBanners() {
+                const defaultBanners = [
+                    "https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+                    "https://images.unsplash.com/photo-1584634731339-252c581abfc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+                    "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
+                ];
+                // Try LocalStorage first (or could be moved to Firebase later)
+                const savedBanners = JSON.parse(localStorage.getItem('siteBanners')) || defaultBanners;
+                
+                const bannerSlides = document.querySelectorAll('.banner-slide');
+                bannerSlides.forEach((slide, index) => {
+                    if(savedBanners[index]) {
+                        slide.style.backgroundImage = `url('${savedBanners[index]}')`;
+                    }
+                });
+            }
+            initializeBanners();
+
+            // --- LOGIN / PROFILE LOGIC ---
+            const loginBtn = document.getElementById('loginBtn');
+            const profileContainer = document.getElementById('profileContainer');
+            const profileDialog = document.getElementById('profileDialog');
+            const logoutItem = document.getElementById('logout-button-item');
+
+            // Check Login Status (Simulated)
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+            if (isLoggedIn) {
+                // Hide Login Button
+                loginBtn.style.display = 'none';
+                // Show Profile Icon
+                profileContainer.style.display = 'block';
+                // Show Sidebar Logout
+                document.body.classList.add('user-logged-in');
+
+                // Trigger Dialog Box Animation
+                setTimeout(() => {
+                    profileDialog.classList.add('show');
+                }, 1000); // 1 sec delay after load
+
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    profileDialog.classList.remove('show');
+                }, 4000); // 1s delay + 3s show time
+            } else {
+                loginBtn.style.display = 'inline-flex';
+                profileContainer.style.display = 'none';
+            }
+
+            // Note: In a real app, clicking logout would set 'isLoggedIn' to false.
+            logoutItem.addEventListener('click', (e) => {
+                localStorage.setItem('isLoggedIn', 'false');
+                window.location.reload();
+            });
+
+
+            // --- Banner Slider Animation ---
+            const bannerSlides = document.querySelectorAll('.banner-slide');
+            const bannerDots = document.querySelectorAll('.banner-dot');
+            let currentSlide = 0;
+            function showSlide(index) {
+                bannerSlides.forEach(slide => slide.classList.remove('active'));
+                bannerDots.forEach(dot => dot.classList.remove('active'));
+                bannerSlides[index].classList.add('active');
+                bannerDots[index].classList.add('active');
+                currentSlide = index;
+            }
+            function nextSlide() {
+                let nextIndex = (currentSlide + 1) % bannerSlides.length;
+                showSlide(nextIndex);
+            }
+            setInterval(nextSlide, 5000);
+            bannerDots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const index = parseInt(dot.getAttribute('data-index'));
+                    showSlide(index);
+                });
+            });
+
+            // --- EMERGENCY SECTION LOGIC ---
+            const emergencyGrid = document.getElementById('emergencyGrid');
+            
+            function loadIndexEmergencyCards() {
+                const cards = JSON.parse(localStorage.getItem('emergencyCards')) || [];
+                const now = new Date().getTime();
+                const validCards = cards.filter(card => new Date(card.deletionTime).getTime() > now);
+                const cardsToShow = validCards.slice(0, 10);
+                
+                emergencyGrid.innerHTML = '';
+                
+                if (cardsToShow.length === 0) {
+                    emergencyGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">বর্তমানে কোনো জরুরি রক্তের প্রয়োজন নেই।</p>';
+                    return;
+                }
+
+                cardsToShow.forEach(renderIndexEmergencyCard);
+            }
+
+            function renderIndexEmergencyCard(emData) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'emergency-card';
+                
+                const creatorName = emData.creatorName || "অজানা";
+                
+                const divisionMap = {
+                    "barishal": "বরিশাল",
+                    "chattogram": "চট্টগ্রাম",
+                    "dhaka": "ঢাকা",
+                    "khulna": "খুলনা",
+                    "mymensingh": "ময়মনসিংহ",
+                    "rajshahi": "রাজশাহী",
+                    "rangpur": "রংপুর",
+                    "sylhet": "সিলেট"
+                };
+                const divName = divisionMap[emData.division] || emData.division;
+
+                const postedTime = "এইমাত্র"; 
+
+                cardDiv.innerHTML = `
+                    <div class="e-card-top">
+                        <div class="blood-group-badge">${emData.bloodGroup}</div>
+                        <div class="creator-info">
+                            <span class="creator-name"><i class="fas fa-user-circle"></i> ${creatorName}</span>
+                        </div>
+                        <div class="e-card-tags">
+                            <span class="posted-time">${postedTime}</span>
+                            <span class="urgent-tag">Urgent</span>
+                        </div>
+                    </div>
+                    <div class="e-details">
+                        <h4>${emData.location}</h4>
+                        <p><i class="fas fa-user"></i> রোগী: ${emData.patientName}</p>
+                        <p><i class="fas fa-notes-medical"></i> সমস্যা: ${emData.problem}</p>
+                        <p><i class="fas fa-map-marked-alt"></i> ঠিকানা: ${emData.upazilaText}, ${emData.districtText}, ${divName}</p>
+                    </div>
+                    <div class="e-actions">
+                        <button class="btn btn-sm btn-call" onclick="window.location.href='tel:${emData.mobile}'"><i class="fas fa-phone-alt"></i> কল করুন</button>
+                        <button class="btn btn-sm btn-outline">ডিটেইলস</button>
+                    </div>
+                `;
+                emergencyGrid.prepend(cardDiv);
+            }
+
+            loadIndexEmergencyCards();
+            
+            // --- UPDATES SECTION LOGIC ---
+            const updatesGrid = document.getElementById('updatesGrid');
+            const updatesData = [];
+
+            function createUpdateCardHTML(data) {
+                const posted = "কিছুক্ষণ আগে"; 
+                const imageHTML = data.imageUrl ? `<div class="update-card-image"><img src="${data.imageUrl}" alt="${data.title}"></div>` : '';
+                return `<div class="update-card">${imageHTML}<div class="update-card-content"><h3>${data.title}</h3><p>${data.content}</p><div class="update-card-timestamp">${posted}</div></div></div>`;
+            }
+
+            function renderUpdates() {
+                if (updatesData.length === 0) { 
+                    updatesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">কোন নতুন আপডেট নেই।</p>'; 
+                    return; 
+                }
+                let content = '';
+                updatesData.forEach(update => { content += createUpdateCardHTML(update); });
+                updatesGrid.innerHTML = content;
+            }
+            renderUpdates();
+
+            // --- Sidebar and Theme Logic ---
+            const sidebar = document.querySelector(".sidebar");
+            const backdrop = document.querySelector(".sidebar-backdrop");
+            const openMenuBtn = document.querySelector(".sidebar-menu-button-header");
+            const closeMenuBtn = document.querySelector(".sidebar-back-button");
+
+            const openSidebar = () => {
+                sidebar.classList.add("is-open");
+                backdrop.classList.add("is-open");
+            };
+            const closeSidebar = () => {
+                sidebar.classList.remove("is-open");
+                backdrop.classList.remove("is-open");
+            };
+
+            openMenuBtn.addEventListener("click", (e) => { e.preventDefault(); openSidebar(); });
+            closeMenuBtn.addEventListener("click", (e) => { e.preventDefault(); closeSidebar(); });
+            backdrop.addEventListener("click", (e) => { e.preventDefault(); closeSidebar(); });
+            
+            const themeToggleButton = document.getElementById('theme-toggle');
+            const body = document.body;
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            }
+
+            themeToggleButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                body.classList.toggle('dark-mode');
+                
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // --- Dropdown Menu Script ---
+            const toggleDropdown = (dropdown, menu, isOpen) => {
+              dropdown.classList.toggle("open", isOpen);
+              menu.style.height = isOpen ? `${menu.scrollHeight}px` : "0";
+            };
+
+            const closeAllDropdowns = () => {
+              document.querySelectorAll(".dropdown-container.open").forEach((openDropdown) => {
+                toggleDropdown(openDropdown, openDropdown.querySelector(".dropdown-menu"), false);
+              });
+            };
+            
+            document.querySelectorAll(".dropdown-toggle").forEach((dropdownToggle) => {
+              dropdownToggle.addEventListener("click", (e) => {
+                e.preventDefault();
+                const dropdown = dropdownToggle.closest(".dropdown-container");
+                const menu = dropdown.querySelector(".dropdown-menu");
+                const isOpen = dropdown.classList.contains("open");
+                
+                if (!sidebar.classList.contains('collapsed')) {
+                    closeAllDropdowns();
+                }
+                toggleDropdown(dropdown, menu, !isOpen);
+              });
+            });
+        });
+    </script>
+</body>
+</html>

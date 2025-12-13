@@ -1,5 +1,3 @@
-<!-- START OF FILE admin.html -->
-
 <!DOCTYPE html>
 <html lang="bn" data-bs-theme="light">
 <head>
@@ -491,7 +489,8 @@
                                     <div class="spinner-border text-primary spinner-border-sm"></div> লোড হচ্ছে...
                                 </div>
 
-                                <div class="list-group" id="finalContactList" style="padding-bottom: 70px;">
+                                <!-- MODIFICATION 3: Increased padding bottom -->
+                                <div class="list-group" id="finalContactList" style="padding-bottom: 120px;">
                                     <!-- Populated by DB -->
                                 </div>
 
@@ -613,6 +612,9 @@
                                     <div class="row g-2 mb-2">
                                         <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamName" placeholder="নাম"></div>
                                         <div class="col-6"><input type="text" class="form-control form-control-sm" id="teamRole" placeholder="পদবী"></div>
+                                        <!-- MODIFICATION 1: Added Contact Input -->
+                                        <div class="col-12"><input type="text" class="form-control form-control-sm" id="teamContact" placeholder="যোগাযোগ লিঙ্ক (Facebook/Phone)"></div>
+                                        
                                         <div class="col-12"><input type="text" class="form-control form-control-sm" id="teamImg" placeholder="ছবির URL"></div>
                                         <div class="col-12"><textarea class="form-control form-control-sm" id="teamBio" placeholder="সংক্ষিপ্ত বর্ণনা" rows="2"></textarea></div>
                                         <div class="col-12 text-end">
@@ -633,10 +635,14 @@
                         <div class="col-md-6">
                             <div class="card p-4 h-100">
                                 <h5 class="mb-3" id="partnerFormTitle">পার্টনার লোগো যুক্ত করুন</h5>
-                                <div class="input-group mb-3">
-                                    <input type="text" class="form-control" id="partnerLogoUrl" placeholder="লোগো URL">
-                                    <button class="btn btn-secondary d-none" type="button" id="btnCancelEditPartner">X</button>
-                                    <button class="btn btn-success" type="button" id="btnAddPartner">যুক্ত করুন</button>
+                                <!-- MODIFICATION 2: Added URL Link Input -->
+                                <div class="mb-2">
+                                    <input type="text" class="form-control form-control-sm mb-2" id="partnerLogoUrl" placeholder="লোগো URL">
+                                    <input type="text" class="form-control form-control-sm" id="partnerLinkUrl" placeholder="লিঙ্ক URL (website/page)">
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-secondary d-none" type="button" id="btnCancelEditPartner">বাতিল</button>
+                                    <button class="btn btn-sm btn-success" type="button" id="btnAddPartner">যুক্ত করুন</button>
                                 </div>
                                 <hr>
                                 <h6 class="text-muted">পার্টনার লিস্ট</h6>
@@ -1042,21 +1048,23 @@
             const role = document.getElementById('teamRole').value;
             const img = document.getElementById('teamImg').value;
             const bio = document.getElementById('teamBio').value;
+            const contact = document.getElementById('teamContact').value; // Added contact
             
             if(!name) return alert("নাম দিন");
 
             try {
                 if(editingTeamId) {
-                    await updateDoc(doc(db, "team_members", editingTeamId), { name, role, image: img, bio });
+                    await updateDoc(doc(db, "team_members", editingTeamId), { name, role, image: img, bio, contact });
                     alert("আপডেট হয়েছে!");
                     resetTeamForm();
                 } else {
-                    await addDoc(collection(db, "team_members"), { name, role, image: img, bio });
+                    await addDoc(collection(db, "team_members"), { name, role, image: img, bio, contact });
                     alert("যুক্ত হয়েছে!");
                     document.getElementById('teamName').value = '';
                     document.getElementById('teamRole').value = '';
                     document.getElementById('teamImg').value = '';
                     document.getElementById('teamBio').value = '';
+                    document.getElementById('teamContact').value = ''; // Reset
                 }
                 loadTeamMembers();
             } catch(e) { alert(e.message); }
@@ -1069,6 +1077,7 @@
             document.getElementById('teamRole').value = data.role || '';
             document.getElementById('teamImg').value = data.image || '';
             document.getElementById('teamBio').value = data.bio || '';
+            document.getElementById('teamContact').value = data.contact || ''; // Populate
 
             document.getElementById('teamFormTitle').innerText = "মেম্বার আপডেট করুন";
             document.getElementById('btnAddTeam').innerText = "আপডেট";
@@ -1084,6 +1093,7 @@
             document.getElementById('teamRole').value = '';
             document.getElementById('teamImg').value = '';
             document.getElementById('teamBio').value = '';
+            document.getElementById('teamContact').value = ''; // Clear
             document.getElementById('teamFormTitle').innerText = "টিম মেম্বার যুক্ত করুন";
             document.getElementById('btnAddTeam').innerText = "যুক্ত করুন";
             document.getElementById('btnAddTeam').classList.replace('btn-warning', 'btn-success');
@@ -1111,17 +1121,20 @@
 
         document.getElementById('btnAddPartner').addEventListener('click', async () => {
             const url = document.getElementById('partnerLogoUrl').value;
-            if(!url) return alert("URL দিন");
+            const linkUrl = document.getElementById('partnerLinkUrl').value; // Added link URL
+
+            if(!url) return alert("লোগো URL দিন");
 
             try {
                 if(editingPartnerId) {
-                    await updateDoc(doc(db, "partners", editingPartnerId), { imageUrl: url });
+                    await updateDoc(doc(db, "partners", editingPartnerId), { imageUrl: url, linkUrl: linkUrl });
                     alert("আপডেট হয়েছে!");
                     resetPartnerForm();
                 } else {
-                    await addDoc(collection(db, "partners"), { imageUrl: url });
+                    await addDoc(collection(db, "partners"), { imageUrl: url, linkUrl: linkUrl });
                     alert("যুক্ত হয়েছে!");
                     document.getElementById('partnerLogoUrl').value = '';
+                    document.getElementById('partnerLinkUrl').value = ''; // Reset
                 }
                 loadPartners();
             } catch(e) { alert(e.message); }
@@ -1131,6 +1144,7 @@
             const data = JSON.parse(decodeURIComponent(dataStr));
             editingPartnerId = id;
             document.getElementById('partnerLogoUrl').value = data.imageUrl || '';
+            document.getElementById('partnerLinkUrl').value = data.linkUrl || ''; // Populate
             
             document.getElementById('partnerFormTitle').innerText = "লোগো আপডেট করুন";
             document.getElementById('btnAddPartner').innerText = "আপডেট";
@@ -1143,6 +1157,7 @@
         function resetPartnerForm() {
             editingPartnerId = null;
             document.getElementById('partnerLogoUrl').value = '';
+            document.getElementById('partnerLinkUrl').value = ''; // Clear
             document.getElementById('partnerFormTitle').innerText = "পার্টনার লোগো যুক্ত করুন";
             document.getElementById('btnAddPartner').innerText = "যুক্ত করুন";
             document.getElementById('btnAddPartner').classList.replace('btn-warning', 'btn-success');
@@ -1609,4 +1624,4 @@
 
     </script>
 </body>
-</html>
+    </html>

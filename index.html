@@ -503,7 +503,7 @@
                     </div>
                 </div>
 
-                <!-- Add/Edit Contact Modal -->
+                <!-- Add/Edit Contact Modal (Updated to match all-search.html) -->
                 <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -513,17 +513,40 @@
                             </div>
                             <div class="modal-body">
                                 <form id="contactForm">
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="small text-muted">সেকশন</label>
+                                            <input type="text" id="modalCategory" class="form-control form-control-sm" disabled>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small text-muted">বিভাগ</label>
+                                            <input type="text" id="modalDivision" class="form-control form-control-sm" disabled>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small text-muted">জেলা</label>
+                                            <input type="text" id="modalDistrict" class="form-control form-control-sm" disabled>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small text-muted">উপজেলা</label>
+                                            <input type="text" id="modalUpazila" class="form-control form-control-sm" disabled>
+                                        </div>
+                                    </div>
+                                    <hr>
                                     <div class="mb-3">
-                                        <label class="form-label">প্রতিষ্ঠানের নাম / ব্যক্তি</label>
-                                        <input type="text" class="form-control" id="contactName" required>
+                                        <label class="form-label">নাম (অপশনাল)</label>
+                                        <input type="text" class="form-control" id="modalPersonName" placeholder="ব্যক্তির নাম...">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">ফোন নম্বর</label>
-                                        <input type="text" class="form-control" id="contactPhone" required>
+                                        <label class="form-label">পদ / প্রতিষ্ঠান নাম</label>
+                                        <input type="text" class="form-control" id="modalOfficeName" placeholder="প্রতিষ্ঠানের নাম..." required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">বিস্তারিত / ঠিকানা (ঐচ্ছিক)</label>
-                                        <textarea class="form-control" id="contactDetails" rows="2"></textarea>
+                                        <label class="form-label">মোবাইল নম্বর</label>
+                                        <input type="text" class="form-control" id="modalPhone" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">ই-মেল (অপশনাল)</label>
+                                        <input type="email" class="form-control" id="modalEmail" placeholder="example@mail.com">
                                     </div>
                                 </form>
                             </div>
@@ -587,7 +610,7 @@
                     </div>
                 </div>
 
-                <!-- Settings Section -->
+                <!-- Settings Section (Updated with Pass Key) -->
                 <div id="settings" class="page-section fade-in d-none">
                     <div class="card p-4" style="max-width: 500px; margin: 0 auto;">
                         <h5 class="mb-4 text-primary"><i class="fas fa-user-shield me-2"></i>পাসওয়ার্ড পরিবর্তন</h5>
@@ -598,6 +621,16 @@
                             <input type="password" class="form-control" id="newFirebasePass">
                         </div>
                         <button id="btnUpdatePass" class="btn btn-warning w-100 fw-bold">পাসওয়ার্ড আপডেট করুন</button>
+                    </div>
+
+                    <!-- Pass Key Update Card -->
+                    <div class="card p-4 mt-4" style="max-width: 500px; margin: 0 auto;">
+                        <h5 class="mb-4 text-success"><i class="fas fa-key me-2"></i>সার্চ পেজ পাস-কী</h5>
+                        <div class="mb-3">
+                            <label class="form-label">নতুন পাস-কী (৬ ডিজিট)</label>
+                            <input type="text" class="form-control" id="newPassKey" placeholder="123456" maxlength="6">
+                        </div>
+                        <button id="btnUpdatePassKey" class="btn btn-success w-100 fw-bold">পাস-কী আপডেট করুন</button>
                     </div>
                 </div>
 
@@ -1224,11 +1257,15 @@
                     
                     const item = document.createElement('div');
                     item.className = 'list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm border rounded';
+                    
+                    // Parse details to show summary
+                    const cleanDetails = d.details ? d.details.replace(' | ', ', ') : '';
+
                     item.innerHTML = `
                         <div>
                             <h6 class="mb-1 fw-bold">${d.name}</h6>
                             <div class="small text-muted"><i class="fas fa-phone-alt me-1"></i> ${d.phone}</div>
-                            ${d.details ? `<div class="small text-muted"><i class="fas fa-info-circle me-1"></i> ${d.details}</div>` : ''}
+                            ${cleanDetails ? `<div class="small text-muted"><i class="fas fa-info-circle me-1"></i> ${cleanDetails}</div>` : ''}
                         </div>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-outline-warning" onclick="editContactDB('${doc.id}', '${dataStr}')"><i class="fas fa-edit"></i></button>
@@ -1247,14 +1284,23 @@
 
         // Add/Edit Contact Database Action
         document.getElementById('btnSaveContactDB').addEventListener('click', async () => {
-            const name = document.getElementById('contactName').value;
-            const phone = document.getElementById('contactPhone').value;
-            const details = document.getElementById('contactDetails').value;
+            const oName = document.getElementById('modalOfficeName').value;
+            const pName = document.getElementById('modalPersonName').value;
+            const mob = document.getElementById('modalPhone').value;
+            const mail = document.getElementById('modalEmail').value;
 
-            if(!name || !phone) return alert("নাম এবং ফোন নম্বর আবশ্যক");
+            if(!oName || !mob) return alert("প্রতিষ্ঠান নাম এবং ফোন নম্বর আবশ্যক");
+
+            // Construct Details String like all-search.html
+            let detailsParts = [];
+            if(pName) detailsParts.push(pName);
+            if(mail) detailsParts.push(mail);
+            const detailsStr = detailsParts.join(" | ");
 
             const dataPayload = {
-                name, phone, details,
+                name: oName, // Saved as 'name' (Office Name)
+                phone: mob,
+                details: detailsStr,
                 category: currentCLState.category,
                 division: currentCLState.division,
                 district: currentCLState.district,
@@ -1270,6 +1316,7 @@
                 } else {
                     // Add
                     dataPayload.createdAt = new Date();
+                    dataPayload.source = "admin_panel";
                     await addDoc(collection(db, "contacts"), dataPayload);
                     alert("যুক্ত সফল হয়েছে!");
                 }
@@ -1288,9 +1335,29 @@
         window.editContactDB = (id, dataStr) => {
             const data = JSON.parse(decodeURIComponent(dataStr));
             editingContactDBId = id;
-            document.getElementById('contactName').value = data.name || '';
-            document.getElementById('contactPhone').value = data.phone || '';
-            document.getElementById('contactDetails').value = data.details || '';
+            
+            // Populate Location Context Fields
+            document.getElementById('modalCategory').value = data.category || '';
+            document.getElementById('modalDivision').value = data.division || '';
+            document.getElementById('modalDistrict').value = data.district || '';
+            document.getElementById('modalUpazila').value = data.upazila || '';
+
+            // Populate Fields
+            document.getElementById('modalOfficeName').value = data.name || '';
+            document.getElementById('modalPhone').value = data.phone || '';
+            
+            // Parse Details String (Person Name | Email)
+            let pName = "";
+            let email = "";
+            if(data.details) {
+                const parts = data.details.split(" | ");
+                if(parts.length > 0) pName = parts[0];
+                if(parts.length > 1) email = parts[1];
+                // Check if simple email check is needed or rely on split order from all-search logic
+                if(pName.includes('@') && !email) { email = pName; pName = ""; } 
+            }
+            document.getElementById('modalPersonName').value = pName;
+            document.getElementById('modalEmail').value = email;
             
             document.getElementById('contactModalTitle').innerText = "কন্টাক্ট এডিট করুন";
             document.getElementById('btnSaveContactDB').innerText = "আপডেট";
@@ -1313,6 +1380,12 @@
         // Modal Helpers
         window.openContactModal = () => {
             resetContactModal();
+            // Pre-fill location context
+            document.getElementById('modalCategory').value = currentCLState.category;
+            document.getElementById('modalDivision').value = currentCLState.division;
+            document.getElementById('modalDistrict').value = currentCLState.district;
+            document.getElementById('modalUpazila').value = currentCLState.upazila;
+            
             contactModal.show();
         };
 
@@ -1322,6 +1395,19 @@
             document.getElementById('contactModalTitle').innerText = "নতুন কন্টাক্ট যুক্ত করুন";
             document.getElementById('btnSaveContactDB').innerText = "সেভ করুন";
         }
+
+        // --- PASS KEY UPDATE LOGIC ---
+        document.getElementById('btnUpdatePassKey').addEventListener('click', async () => {
+            const pk = document.getElementById('newPassKey').value;
+            if(pk.length < 4) return alert("মিনিমাম ৪ ডিজিট দিন");
+            try {
+                await setDoc(doc(db, "settings", "admin"), { passKey: pk }, { merge: true });
+                alert("পাস-কী সফলভাবে আপডেট হয়েছে!");
+                document.getElementById('newPassKey').value = '';
+            } catch(e) {
+                alert("এরর: " + e.message);
+            }
+        });
 
 
         // Global Delete Function for other sections
@@ -1624,4 +1710,4 @@
 
     </script>
 </body>
-    </html>
+</html>

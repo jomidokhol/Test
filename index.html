@@ -1,3 +1,5 @@
+<!-- START OF FILE admin.html -->
+
 <!DOCTYPE html>
 <html lang="bn" data-bs-theme="light">
 <head>
@@ -177,6 +179,57 @@
             cursor: pointer;
             margin-left: 5px;
         }
+
+        /* Contact List Slider Styles */
+        .cl-slider-container {
+            width: 500%; /* 5 steps */
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            height: 100%;
+        }
+        .cl-slide {
+            width: 20%; /* 100% / 5 */
+            flex-shrink: 0;
+            padding: 10px;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+        .cl-item {
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--bs-border-color);
+        }
+        .cl-item:hover {
+            background-color: var(--bs-tertiary-bg);
+            transform: translateX(5px);
+            border-color: var(--primary-color);
+        }
+        
+        /* Floating Action Button */
+        .fab-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+        .fab-btn:hover {
+            transform: scale(1.1);
+            background-color: #375ac7;
+        }
     </style>
 </head>
 <body>
@@ -226,6 +279,7 @@
                 <li><a href="#" onclick="showPage('dashboard', this)" class="active-link"><i class="fas fa-home me-3"></i>ড্যাশবোর্ড</a></li>
                 <li><a href="#" onclick="showPage('general', this)"><i class="fas fa-sliders-h me-3"></i>হোম কনফিগার</a></li>
                 <li><a href="#" onclick="showPage('userlist', this)"><i class="fas fa-users me-3"></i>ইউজার লিস্ট</a></li>
+                <li><a href="#" onclick="showPage('contactlist', this)"><i class="fas fa-address-book me-3"></i>কন্টাক্ট লিস্ট</a></li>
                 <li><a href="#" onclick="showPage('about', this)"><i class="fas fa-info-circle me-3"></i>আমাদের সম্পর্কে</a></li>
                 <li><a href="#" onclick="showPage('contact', this)"><i class="fas fa-address-card me-3"></i>যোগাযোগ তথ্য</a></li>
                 <li><a href="#" onclick="showPage('updates', this)"><i class="fas fa-bullhorn me-3"></i>নিউজ আপডেট</a></li>
@@ -350,10 +404,19 @@
                 <!-- User List Section -->
                 <div id="userlist" class="page-section fade-in d-none">
                     <div class="card p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
                             <h5 class="mb-0">রেজিস্টার্ড ইউজার (Firestore)</h5>
                             <button id="btnRefreshUsers" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync"></i> রিফ্রেশ</button>
                         </div>
+                        
+                        <!-- Search Filter -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary"><i class="fas fa-search"></i></span>
+                                <input type="text" id="userSearchInput" class="form-control" placeholder="ইমেইল অথবা মোবাইল নম্বর দিয়ে খুঁজুন...">
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
@@ -368,6 +431,107 @@
                                 </tbody>
                             </table>
                             <div id="noUsersMsg" class="text-center text-muted py-3 d-none">কোন ইউজার পাওয়া যায়নি</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact List Section (New) -->
+                <div id="contactlist" class="page-section fade-in d-none">
+                    <div class="card p-0 overflow-hidden" style="height: 600px;">
+                        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <button id="clBackBtn" class="btn btn-sm btn-outline-secondary me-2 d-none" onclick="prevContactStep()">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <h5 class="m-0" id="clTitle">ক্যাটাগরি নির্বাচন করুন</h5>
+                            </div>
+                            <!-- Step Badge Removed as per request -->
+                        </div>
+                        
+                        <div class="cl-slider-container" id="clSlider">
+                            <!-- Step 1: Categories -->
+                            <div class="cl-slide" id="clStep1">
+                                <h6 class="text-muted mb-3">সেবা ক্যাটাগরি</h6>
+                                <div class="list-group list-group-flush" id="clCategoryList">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Divisions -->
+                            <div class="cl-slide" id="clStep2">
+                                <h6 class="text-muted mb-3">বিভাগ নির্বাচন করুন</h6>
+                                <div class="list-group list-group-flush" id="clDivisionList">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Districts -->
+                            <div class="cl-slide" id="clStep3">
+                                <h6 class="text-muted mb-3">জেলা নির্বাচন করুন</h6>
+                                <div class="list-group list-group-flush" id="clDistrictList">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Upazilas -->
+                            <div class="cl-slide" id="clStep4">
+                                <h6 class="text-muted mb-3">উপজেলা নির্বাচন করুন</h6>
+                                <div class="list-group list-group-flush" id="clUpazilaList">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Result / Add Contact -->
+                            <div class="cl-slide" id="clStep5">
+                                <div class="alert alert-info py-2 small">
+                                    <i class="fas fa-map-marker-alt me-1"></i> <span id="clSelectedBreadcrumb" class="fw-bold"></span>
+                                </div>
+                                
+                                <div id="clLoading" class="text-center py-4 d-none">
+                                    <div class="spinner-border text-primary spinner-border-sm"></div> লোড হচ্ছে...
+                                </div>
+
+                                <div class="list-group" id="finalContactList" style="padding-bottom: 70px;">
+                                    <!-- Populated by DB -->
+                                </div>
+
+                                <!-- Floating Add Button -->
+                                <button class="fab-btn" onclick="openContactModal()" title="নতুন কন্টাক্ট যুক্ত করুন">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Contact Modal -->
+                <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="contactModalTitle">নতুন কন্টাক্ট যুক্ত করুন</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="contactForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">প্রতিষ্ঠানের নাম / ব্যক্তি</label>
+                                        <input type="text" class="form-control" id="contactName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">ফোন নম্বর</label>
+                                        <input type="text" class="form-control" id="contactPhone" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">বিস্তারিত / ঠিকানা (ঐচ্ছিক)</label>
+                                        <textarea class="form-control" id="contactDetails" rows="2"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                                <button type="button" class="btn btn-primary" id="btnSaveContactDB">সেভ করুন</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -520,7 +684,7 @@
         // Import Firebase Functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnKQr2k2ZWnPlEZiJtMDewv6z3Z7p3kiU",
@@ -546,6 +710,11 @@
         let editingNewsId = null;
         let editingTeamId = null;
         let editingPartnerId = null;
+        
+        // --- CONTACT LIST VARIABLES ---
+        let editingContactDBId = null;
+        let currentCLState = { category: '', division: '', district: '', upazila: '' };
+        let contactModal = null;
 
         // --- AUTH OBSERVER (Check if user is logged in) ---
         onAuthStateChanged(auth, (user) => {
@@ -610,6 +779,9 @@
             // Load Initial Data
             loadDashboardData();
             loadGeneralSettings();
+            
+            // Init Modal
+            contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
         }
 
         // --- FIRESTORE FUNCTIONS ---
@@ -773,7 +945,7 @@
             document.getElementById('btnCancelEditNews').classList.add('d-none');
         }
 
-        // 4. Load User List
+        // 4. Load User List & Filter
         async function loadUserList() {
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';
@@ -801,6 +973,22 @@
                 tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">ডাটা লোড করা যায়নি (Firestore Rules চেক করুন)</td></tr>`;
             }
         }
+        
+        // Search Functionality for User List
+        document.getElementById('userSearchInput').addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#usersTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if(text.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
         document.getElementById('btnRefreshUsers').addEventListener('click', loadUserList);
         window.loadUserListRef = loadUserList; 
 
@@ -983,7 +1171,145 @@
             alert("সেভ হয়েছে!");
         });
 
-        // Global Delete Function
+        // 9. --- CONTACT LIST DATABASE INTEGRATION (NEW) ---
+        
+        // Load Contacts from Firestore
+        window.loadContactListDB = async (category, division, district, upazila) => {
+            const listContainer = document.getElementById('finalContactList');
+            const loader = document.getElementById('clLoading');
+            
+            listContainer.innerHTML = '';
+            loader.classList.remove('d-none');
+
+            // Set current state
+            currentCLState = { category, division, district, upazila };
+
+            try {
+                // Query Firestore
+                const q = query(
+                    collection(db, "contacts"),
+                    where("category", "==", category),
+                    where("division", "==", division),
+                    where("district", "==", district),
+                    where("upazila", "==", upazila)
+                );
+
+                const querySnapshot = await getDocs(q);
+                
+                loader.classList.add('d-none');
+
+                if(querySnapshot.empty) {
+                    listContainer.innerHTML = '<div class="text-center text-muted py-4">এই লোকেশনে কোন ডাটা পাওয়া যায়নি।</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const d = doc.data();
+                    const dataStr = encodeURIComponent(JSON.stringify(d));
+                    
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm border rounded';
+                    item.innerHTML = `
+                        <div>
+                            <h6 class="mb-1 fw-bold">${d.name}</h6>
+                            <div class="small text-muted"><i class="fas fa-phone-alt me-1"></i> ${d.phone}</div>
+                            ${d.details ? `<div class="small text-muted"><i class="fas fa-info-circle me-1"></i> ${d.details}</div>` : ''}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-warning" onclick="editContactDB('${doc.id}', '${dataStr}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteContactDB('${doc.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+
+            } catch(e) {
+                loader.classList.add('d-none');
+                listContainer.innerHTML = `<div class="alert alert-danger">ডাটা লোড করতে সমস্যা: ${e.message}</div>`;
+                console.error(e);
+            }
+        };
+
+        // Add/Edit Contact Database Action
+        document.getElementById('btnSaveContactDB').addEventListener('click', async () => {
+            const name = document.getElementById('contactName').value;
+            const phone = document.getElementById('contactPhone').value;
+            const details = document.getElementById('contactDetails').value;
+
+            if(!name || !phone) return alert("নাম এবং ফোন নম্বর আবশ্যক");
+
+            const dataPayload = {
+                name, phone, details,
+                category: currentCLState.category,
+                division: currentCLState.division,
+                district: currentCLState.district,
+                upazila: currentCLState.upazila,
+                updatedAt: new Date()
+            };
+
+            try {
+                if(editingContactDBId) {
+                    // Update
+                    await updateDoc(doc(db, "contacts", editingContactDBId), dataPayload);
+                    alert("আপডেট সফল হয়েছে!");
+                } else {
+                    // Add
+                    dataPayload.createdAt = new Date();
+                    await addDoc(collection(db, "contacts"), dataPayload);
+                    alert("যুক্ত সফল হয়েছে!");
+                }
+                
+                contactModal.hide();
+                resetContactModal();
+                // Reload list
+                window.loadContactListDB(currentCLState.category, currentCLState.division, currentCLState.district, currentCLState.upazila);
+
+            } catch(e) {
+                alert("এরর: " + e.message);
+            }
+        });
+
+        // Edit Helper
+        window.editContactDB = (id, dataStr) => {
+            const data = JSON.parse(decodeURIComponent(dataStr));
+            editingContactDBId = id;
+            document.getElementById('contactName').value = data.name || '';
+            document.getElementById('contactPhone').value = data.phone || '';
+            document.getElementById('contactDetails').value = data.details || '';
+            
+            document.getElementById('contactModalTitle').innerText = "কন্টাক্ট এডিট করুন";
+            document.getElementById('btnSaveContactDB').innerText = "আপডেট";
+            contactModal.show();
+        };
+
+        // Delete Helper
+        window.deleteContactDB = async (id) => {
+            if(confirm("আপনি কি নিশ্চিত এই কন্টাক্টটি মুছে ফেলতে চান?")) {
+                try {
+                    await deleteDoc(doc(db, "contacts", id));
+                    // Reload list
+                    window.loadContactListDB(currentCLState.category, currentCLState.division, currentCLState.district, currentCLState.upazila);
+                } catch(e) {
+                    alert("এরর: " + e.message);
+                }
+            }
+        };
+
+        // Modal Helpers
+        window.openContactModal = () => {
+            resetContactModal();
+            contactModal.show();
+        };
+
+        function resetContactModal() {
+            editingContactDBId = null;
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactModalTitle').innerText = "নতুন কন্টাক্ট যুক্ত করুন";
+            document.getElementById('btnSaveContactDB').innerText = "সেভ করুন";
+        }
+
+
+        // Global Delete Function for other sections
         window.deleteDocById = async (collectionName, docId) => {
             if(confirm("মুছে ফেলতে চান?")) {
                 await deleteDoc(doc(db, collectionName, docId));
@@ -1037,6 +1363,7 @@
             if(pageId === 'about' && window.loadAboutData) window.loadAboutData();
             if(pageId === 'contact' && window.loadContactData) window.loadContactData();
             if(pageId === 'updates' && window.loadNewsData) window.loadNewsData();
+            if(pageId === 'contactlist') initContactList();
         }
 
         // --- Dark Mode Logic ---
@@ -1057,6 +1384,229 @@
                 btn.classList.replace('btn-outline-warning', 'btn-outline-secondary');
             }
         }
+
+        // --- CONTACT LIST LOGIC (FULL BANGLADESH DATA) ---
+        
+        // Compact Full Geo Data for Bangladesh
+        const bdGeoData = {
+            "Dhaka": {
+                "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Hazaribagh", "Ramna", "Tejgaon", "Gulshan", "Mirpur", "Pallabi", "Kafrul", "Cantonment", "Uttara", "Mohammadpur", "Dhanmondi", "Badda", "Khilkhet", "Demra", "Jatrabari", "Lalbagh", "Kotwali", "Sutrapur"],
+                "Gazipur": ["Gazipur Sadar", "Kaliakair", "Kapasia", "Sreepur", "Kaliganj"],
+                "Narayanganj": ["Narayanganj Sadar", "Bandar", "Araihazar", "Rupganj", "Sonargaon"],
+                "Manikganj": ["Manikganj Sadar", "Singair", "Saturia", "Shivalaya", "Ghior", "Daulatpur", "Harirampur"],
+                "Munshiganj": ["Munshiganj Sadar", "Tongibari", "Sreenagar", "Lohajang", "Gajaria", "Sirajdikhan"],
+                "Narsingdi": ["Narsingdi Sadar", "Belabo", "Monohardi", "Palash", "Raipura", "Shibpur"],
+                "Tangail": ["Tangail Sadar", "Sakhipur", "Basail", "Madhupur", "Ghatail", "Kalihati", "Nagarpur", "Mirzapur", "Gopalpur", "Delduar", "Bhuapur", "Dhanbari"],
+                "Kishoreganj": ["Kishoreganj Sadar", "Hossainpur", "Pakundia", "Katiadi", "Karimganj", "Tarail", "Itna", "Mithamoin", "Austagram", "Nikli", "Bajitpur", "Kuliarchar", "Bhairab"],
+                "Faridpur": ["Faridpur Sadar", "Boalmari", "Alfadanga", "Madhukhali", "Bhanga", "Nagarkanda", "Charbhadrasan", "Sadarpur", "Saltha"],
+                "Gopalganj": ["Gopalganj Sadar", "Kashiani", "Tungipara", "Kotalipara", "Muksudpur"],
+                "Madaripur": ["Madaripur Sadar", "Kalkini", "Rajoir", "Shibchar"],
+                "Rajbari": ["Rajbari Sadar", "Goalanda", "Pangsa", "Baliakandi", "Kalukhali"],
+                "Shariatpur": ["Shariatpur Sadar", "Naria", "Zajira", "Gosairhat", "Bhedarganj", "Damudya"]
+            },
+            "Chittagong": {
+                "Chittagong": ["Chittagong Sadar", "Sitakunda", "Mirsharai", "Patiya", "Rangunia", "Anwara", "Boalkhali", "Raozan", "Hathazari", "Fatikchhari", "Sandwip", "Lohagara", "Satkania", "Banshkhali", "Chandanaish", "Karnaphuli"],
+                "Cox's Bazar": ["Cox's Bazar Sadar", "Chakaria", "Kutubdia", "Ukhiya", "Moheshkhali", "Pekua", "Ramu", "Teknaf"],
+                "Comilla": ["Comilla Sadar", "Barura", "Brahmanpara", "Burichong", "Chandina", "Chauddagram", "Daudkandi", "Debidwar", "Homna", "Laksam", "Muradnagar", "Nangalkot", "Meghna", "Titas", "Monohargonj", "Lalmai"],
+                "Brahmanbaria": ["Brahmanbaria Sadar", "Kasba", "Nasirnagar", "Sarail", "Ashuganj", "Akhaura", "Nabinagar", "Bancharampur", "Bijoynagar"],
+                "Chandpur": ["Chandpur Sadar", "Faridganj", "Haimchar", "Haziganj", "Kachua", "Matlab North", "Matlab South", "Shahrasti"],
+                "Noakhali": ["Noakhali Sadar", "Begumganj", "Chatkhil", "Companyganj", "Hatiya", "Senbagh", "Sonaimuri", "Subarnachar", "Kabirhat"],
+                "Feni": ["Feni Sadar", "Chhagalnaiya", "Daganbhuiyan", "Parshuram", "Fulgazi", "Sonagazi"],
+                "Lakshmipur": ["Lakshmipur Sadar", "Raipur", "Ramganj", "Ramgati", "Kamalnagar"],
+                "Khagrachhari": ["Khagrachhari Sadar", "Dighinala", "Panchhari", "Laxmichhari", "Mahalchhari", "Manikchhari", "Ramgarh", "Matiranga", "Guimara"],
+                "Rangamati": ["Rangamati Sadar", "Belaichhari", "Bagaichhari", "Barkal", "Juraichhari", "Rajasthali", "Kaptai", "Langadu", "Naniarchar", "Kaukhali"],
+                "Bandarban": ["Bandarban Sadar", "Ali Kadam", "Naikhongchhari", "Rowangchhari", "Lama", "Ruma", "Thanchi"]
+            },
+            "Sylhet": {
+                "Sylhet": ["Sylhet Sadar", "Beanibazar", "Bishwanath", "Dakshin Surma", "Balaganj", "Companiganj", "Fenchuganj", "Golapganj", "Gowainghat", "Jaintiapur", "Kanaighat", "Zakiganj", "Osmani Nagar"],
+                "Moulvibazar": ["Moulvibazar Sadar", "Barlekha", "Juri", "Kamalganj", "Kulaura", "Rajnagar", "Sreemangal"],
+                "Habiganj": ["Habiganj Sadar", "Azmiriganj", "Bahubal", "Baniyachong", "Chunarughat", "Lakhai", "Madhabpur", "Nabiganj", "Shayestaganj"],
+                "Sunamganj": ["Sunamganj Sadar", "Bishwamvarpur", "Chhatak", "Derai", "Dharamapasha", "Dowarabazar", "Jagannathpur", "Jamalganj", "Tahirpur", "Sullah", "Shantiganj"]
+            },
+            "Rajshahi": {
+                "Rajshahi": ["Rajshahi Sadar", "Bagha", "Bagmara", "Charghat", "Durgapur", "Godagari", "Mohanpur", "Paba", "Puthia", "Tanore"],
+                "Bogra": ["Bogra Sadar", "Adamdighi", "Dhupchanchia", "Gabtali", "Kahaloo", "Nandigram", "Sariakandi", "Sahajanpur", "Sherpur", "Shibganj", "Sonatala"],
+                "Naogaon": ["Naogaon Sadar", "Atrai", "Badalgachhi", "Dhamoirhat", "Manda", "Mohadevpur", "Niamatpur", "Patnitala", "Porsha", "Raninagar", "Sapahar"],
+                "Natore": ["Natore Sadar", "Bagatipara", "Baraigram", "Gurudaspur", "Lalpur", "Singra", "Naldanga"],
+                "Chapainawabganj": ["Chapainawabganj Sadar", "Gomastapur", "Nachole", "Bholahat", "Shibganj"],
+                "Pabna": ["Pabna Sadar", "Atgharia", "Bera", "Bhangura", "Chatmohar", "Faridpur", "Ishwardi", "Santhia", "Sujanagar"],
+                "Sirajganj": ["Sirajganj Sadar", "Belkuchi", "Chauhali", "Kamarkhanda", "Kazipur", "Raiganj", "Shahjadpur", "Tarash", "Ullahpara"],
+                "Joypurhat": ["Joypurhat Sadar", "Akkelpur", "Kalai", "Khetlal", "Panchbibi"]
+            },
+            "Khulna": {
+                "Khulna": ["Khulna Sadar", "Batiaghata", "Dacope", "Dumuria", "Dighalia", "Koyra", "Paikgachha", "Phultala", "Rupsha", "Terokhada"],
+                "Bagerhat": ["Bagerhat Sadar", "Chitalmari", "Fakirhat", "Kachua", "Mollahat", "Mongla", "Morrelganj", "Rampal", "Sarankhola"],
+                "Chuadanga": ["Chuadanga Sadar", "Alamdanga", "Damurhuda", "Jibannagar"],
+                "Jessore": ["Jessore Sadar", "Abhaynagar", "Bagherpara", "Chaugachha", "Jhikargachha", "Keshabpur", "Manirampur", "Sharsha"],
+                "Jhenaidah": ["Jhenaidah Sadar", "Harinakunda", "Kaliganj", "Kotchandpur", "Maheshpur", "Shailkupa"],
+                "Kushtia": ["Kushtia Sadar", "Bheramara", "Daulatpur", "Khoksa", "Kumarkhali", "Mirpur"],
+                "Magura": ["Magura Sadar", "Mohammadpur", "Shalikha", "Sreepur"],
+                "Meherpur": ["Meherpur Sadar", "Gangni", "Mujibnagar"],
+                "Narail": ["Narail Sadar", "Kalia", "Lohagara"],
+                "Satkhira": ["Satkhira Sadar", "Assasuni", "Debhata", "Kalaroa", "Kaliganj", "Shyamnagar", "Tala"]
+            },
+            "Barisal": {
+                "Barisal": ["Barisal Sadar", "Agailjhara", "Babuganj", "Bakerganj", "Banaripara", "Gaurnadi", "Hizla", "Mehendiganj", "Muladi", "Wazirpur"],
+                "Barguna": ["Barguna Sadar", "Amtali", "Bamna", "Betagi", "Patharghata", "Taltali"],
+                "Bhola": ["Bhola Sadar", "Burhanuddin", "Char Fasson", "Daulatkhan", "Lalmohan", "Manpura", "Tazumuddin"],
+                "Jhalokati": ["Jhalokati Sadar", "Kathalia", "Nalchity", "Rajapur"],
+                "Patuakhali": ["Patuakhali Sadar", "Bauphal", "Dashmina", "Galachipa", "Kalapara", "Mirzaganj", "Rangabali", "Dumki"],
+                "Pirojpur": ["Pirojpur Sadar", "Bhandaria", "Kawkhali", "Mathbaria", "Nazirpur", "Nesarabad", "Indurkani"]
+            },
+            "Rangpur": {
+                "Rangpur": ["Rangpur Sadar", "Badarganj", "Gangachhara", "Kaunia", "Mithapukur", "Pirgachha", "Pirganj", "Taraganj"],
+                "Dinajpur": ["Dinajpur Sadar", "Birampur", "Birganj", "Bochaganj", "Chirirbandar", "Fulbari", "Ghoraghat", "Hakimpur", "Kaharole", "Khansama", "Nawabganj", "Parbatipur", "Birol"],
+                "Gaibandha": ["Gaibandha Sadar", "Fulchhari", "Gobindaganj", "Palashbari", "Sadullapur", "Saghata", "Sundarganj"],
+                "Kurigram": ["Kurigram Sadar", "Bhurungamari", "Char Rajibpur", "Chilmari", "Phulbari", "Nageshwari", "Rajarhat", "Raomari", "Ulipur"],
+                "Lalmonirhat": ["Lalmonirhat Sadar", "Aditmari", "Hatibandha", "Kaliganj", "Patgram"],
+                "Nilphamari": ["Nilphamari Sadar", "Dimla", "Domar", "Jaldhaka", "Kishoreganj", "Saidpur"],
+                "Panchagarh": ["Panchagarh Sadar", "Atwari", "Boda", "Debiganj", "Tetulia"],
+                "Thakurgaon": ["Thakurgaon Sadar", "Baliadangi", "Haripur", "Pirganj", "Ranishankail"]
+            },
+            "Mymensingh": {
+                "Mymensingh": ["Mymensingh Sadar", "Bhaluka", "Dhobaura", "Fulbaria", "Gafargaon", "Gauripur", "Haluaghat", "Ishwarganj", "Muktagachha", "Nandail", "Phulpur", "Trishal", "Tara Khanda"],
+                "Jamalpur": ["Jamalpur Sadar", "Baksiganj", "Dewanganj", "Islampur", "Madarganj", "Melandaha", "Sarishabari"],
+                "Netrokona": ["Netrokona Sadar", "Atpara", "Barhatta", "Durgapur", "Khaliajuri", "Kalmakanda", "Kendua", "Madan", "Mohanganj", "Purbadhala"],
+                "Sherpur": ["Sherpur Sadar", "Jhenaigati", "Nakla", "Nalitabari", "Sreebardi"]
+            }
+        };
+
+        const clCategories = [
+            { id: 'police', name: 'পুলিশ স্টেশন', icon: 'fa-user-shield' },
+            { id: 'hospital', name: 'হাসপাতাল', icon: 'fa-hospital' },
+            { id: 'ambulance', name: 'এম্বুলেন্স', icon: 'fa-ambulance' },
+            { id: 'electricity', name: 'বিদ্যুৎ জোনাল অফিস', icon: 'fa-bolt' },
+            { id: 'fire', name: 'ফায়ার সার্ভিস', icon: 'fa-fire-extinguisher' },
+            { id: 'gas', name: 'গ্যাস ফিলিং স্টেশন', icon: 'fa-burn' },
+            { id: 'wasa', name: 'ওয়াসা', icon: 'fa-tint' },
+            { id: 'petrol', name: 'পেট্রোল পাম্প', icon: 'fa-gas-pump' },
+            { id: 'govt', name: 'সরকারী কার্যালয়', icon: 'fa-landmark' }
+        ];
+
+        let clState = { step: 0, category: '', division: '', district: '', upazila: '' };
+
+        function initContactList() {
+            renderCategories();
+            goToClStep(0);
+        }
+
+        function goToClStep(stepIndex) {
+            clState.step = stepIndex;
+            const slider = document.getElementById('clSlider');
+            slider.style.transform = `translateX(-${stepIndex * 20}%)`;
+            
+            // Update Header Title Only (Badge removed)
+            const titles = [
+                "ক্যাটাগরি নির্বাচন করুন", 
+                "বিভাগ নির্বাচন করুন", 
+                "জেলা নির্বাচন করুন", 
+                "উপজেলা নির্বাচন করুন", 
+                "রেজাল্ট / কন্টাক্ট লিস্ট"
+            ];
+            document.getElementById('clTitle').innerText = titles[stepIndex];
+            
+            // Show/Hide Back Button
+            if(stepIndex > 0) {
+                document.getElementById('clBackBtn').classList.remove('d-none');
+            } else {
+                document.getElementById('clBackBtn').classList.add('d-none');
+            }
+        }
+
+        function prevContactStep() {
+            if(clState.step > 0) goToClStep(clState.step - 1);
+        }
+
+        // Step 1: Render Categories
+        function renderCategories() {
+            const container = document.getElementById('clCategoryList');
+            container.innerHTML = '';
+            clCategories.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item cl-item d-flex align-items-center py-3';
+                item.innerHTML = `<i class="fas ${cat.icon} me-3 text-primary" style="width:20px"></i> ${cat.name}`;
+                item.onclick = () => {
+                    clState.category = cat.name;
+                    renderDivisions();
+                    goToClStep(1);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // Step 2: Render Divisions
+        function renderDivisions() {
+            const container = document.getElementById('clDivisionList');
+            container.innerHTML = '';
+            const divisions = Object.keys(bdGeoData);
+            
+            divisions.forEach(div => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item cl-item py-3';
+                item.innerText = div + ' বিভাগ';
+                item.onclick = () => {
+                    clState.division = div;
+                    renderDistricts(div);
+                    goToClStep(2);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // Step 3: Render Districts
+        function renderDistricts(divName) {
+            const container = document.getElementById('clDistrictList');
+            container.innerHTML = '';
+            const districts = bdGeoData[divName] ? Object.keys(bdGeoData[divName]) : [];
+            
+            if(districts.length === 0) {
+                container.innerHTML = '<div class="text-muted p-3">এই বিভাগে কোন ডাটা নেই</div>';
+                return;
+            }
+
+            districts.forEach(dist => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item cl-item py-3';
+                item.innerText = dist + ' জেলা';
+                item.onclick = () => {
+                    clState.district = dist;
+                    renderUpazilas(divName, dist);
+                    goToClStep(3);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // Step 4: Render Upazilas
+        function renderUpazilas(divName, distName) {
+            const container = document.getElementById('clUpazilaList');
+            container.innerHTML = '';
+            const upazilas = bdGeoData[divName][distName] || [];
+
+            upazilas.forEach(upz => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item cl-item py-3';
+                item.innerText = upz;
+                item.onclick = () => {
+                    clState.upazila = upz;
+                    showResultPage();
+                    goToClStep(4);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // Step 5: Result Page
+        function showResultPage() {
+            const breadcrumb = `${clState.category} > ${clState.division} > ${clState.district} > ${clState.upazila}`;
+            document.getElementById('clSelectedBreadcrumb').innerText = breadcrumb;
+            
+            // Trigger Firebase Load via window object
+            if(window.loadContactListDB) {
+                window.loadContactListDB(clState.category, clState.division, clState.district, clState.upazila);
+            }
+        }
+
     </script>
 </body>
 </html>

@@ -96,18 +96,18 @@
             transition: all 0.2s;
             border-left: 4px solid transparent;
         }
+        
+        #sidebar ul li a.disabled-link {
+            color: #888;
+            pointer-events: none;
+            background: rgba(0,0,0,0.1);
+        }
 
         #sidebar ul li a:hover, #sidebar ul li a.active-link {
             color: #fff;
             background: rgba(255,255,255,0.1);
             border-left: 4px solid var(--primary-color);
             padding-left: 30px;
-        }
-
-        #sidebar ul li a.disabled-link {
-            color: #888;
-            pointer-events: none;
-            background: rgba(0,0,0,0.1);
         }
 
         /* --- Content Area --- */
@@ -281,10 +281,10 @@
             </div>
             <ul class="components">
                 <!-- Links as requested by the user -->
-                <li><a href="#" onclick="showPage('terms', this)" class="active-link"><i class="fas fa-file-contract me-3"></i>টার্মস এন্ড রেগুলেশন</a></li>
-                <li><a href="#" onclick="showPage('userlist', this)"><i class="fas fa-users me-3"></i>ইউজার লিস্ট</a></li>
-                <li><a href="#" onclick="showPage('contactlist', this)"><i class="fas fa-address-book me-3"></i>কন্টাক্ট লিস্ট</a></li>
-                <li><a href="#" onclick="showPage('updates', this)"><i class="fas fa-bullhorn me-3"></i>নিউজ আপডেট</a></li>
+                <li><a href="#" onclick="showPage('terms', this)" class="active-link" data-menu-item="true"><i class="fas fa-file-contract me-3"></i>টার্মস এন্ড রেগুলেশন</a></li>
+                <li><a href="#" onclick="showPage('userlist', this)" data-menu-item="true"><i class="fas fa-users me-3"></i>ইউজার লিস্ট</a></li>
+                <li><a href="#" onclick="showPage('contactlist', this)" data-menu-item="true"><i class="fas fa-address-book me-3"></i>কন্টাক্ট লিস্ট</a></li>
+                <li><a href="#" onclick="showPage('updates', this)" data-menu-item="true"><i class="fas fa-bullhorn me-3"></i>নিউজ আপডেট</a></li>
                 <li><a href="#" onclick="promptForSettings(this)"><i class="fas fa-cog me-3"></i>সেটিংস</a></li>
             </ul>
             <div class="text-center mt-5">
@@ -324,17 +324,20 @@
             <!-- Main Dynamic Content -->
             <div class="main-content">
                 
-                <!-- Terms and Regulations Section (NEW LANDING PAGE) -->
+                <!-- Terms and Regulations Section (NEW) -->
                 <div id="terms" class="page-section fade-in">
                     <div class="card p-4">
                         <h4 class="mb-3">টার্মস এন্ড রেগুলেশন</h4>
-                        <p class="text-muted">এই পেজের কন্টেন্ট পরে যুক্ত করা হবে। এটি আপনার অ্যাপ্লিকেশনের প্রধান ল্যান্ডিং পেজ হিসেবে কাজ করবে। এখানে আপনি আপনার নীতিমালা, ব্যবহারের শর্তাবলী এবং অন্যান্য গুরুত্বপূর্ণ তথ্য প্রদর্শন করতে পারেন।</p>
-                        <!-- Placeholder Content -->
-                        <div class="mt-4 p-4 bg-body-tertiary rounded">
-                            <h5>ব্যবহারের শর্তাবলী</h5>
-                            <p>১. এই প্যানেলটি শুধুমাত্র অনুমোদিত অ্যাডমিনদের ব্যবহারের জন্য।</p>
-                            <p>২. কোনো ব্যবহারকারীর তথ্য অনুমতি ছাড়া প্রকাশ বা অপব্যবহার করা যাবে না।</p>
-                            <p>৩. সিস্টেমের নিরাপত্তা বিঘ্নিত হতে পারে এমন কোনো কাজ করা থেকে বিরত থাকুন।</p>
+                        <p>এই অ্যাডমিন প্যানেলটি ব্যবহার করার জন্য আপনাকে অবশ্যই নিম্নলিখিত নিয়ম ও শর্তাবলী মেনে চলতে হবে। কোনো প্রকার অপব্যবহার বা নিয়মের লঙ্ঘন আপনার অ্যাক্সেস স্থায়ীভাবে বাতিল করার কারণ হতে পারে।</p>
+                        <ol>
+                            <li><strong>গোপনীয়তা:</strong> এই প্যানেলের মাধ্যমে প্রাপ্ত সকল ব্যবহারকারীর তথ্য (যেমন: ইমেইল, ফোন নম্বর) সম্পূর্ণ গোপনীয়। এই তথ্য কোনো তৃতীয় পক্ষের সাথে শেয়ার করা বা বাণিজ্যিক উদ্দেশ্যে ব্যবহার করা কঠোরভাবে নিষিদ্ধ।</li>
+                            <li><strong>জেলার দায়িত্ব:</strong> প্রত্যেক অ্যাডমিনকে একটি নির্দিষ্ট জেলা পরিচালনার দায়িত্ব দেওয়া হয়েছে। আপনাকে শুধুমাত্র আপনার নির্ধারিত জেলার ডেটা ম্যানেজ করার অনুমতি দেওয়া হয়েছে। অন্য জেলার কার্যক্রমে হস্তক্ষেপ করা যাবে না।</li>
+                            <li><strong>ডেটা ম্যানেজমেন্ট:</strong> কন্টাক্ট লিস্ট বা নিউজ আপডেটের সময় সঠিক এবং যাচাইকৃত তথ্য প্রদান করা আপনার দায়িত্ব। কোনো প্রকার ভুল, মিথ্যা বা বিভ্রান্তিকর তথ্য প্রবেশ করানো যাবে না।</li>
+                            <li><strong>নিরাপত্তা:</strong> আপনার লগইন তথ্য (ইমেইল এবং পাসওয়ার্ড) সুরক্ষিত রাখার দায়িত্ব আপনার। আপনার অ্যাকাউন্ট থেকে কোনো অনাকাঙ্ক্ষিত কার্যকলাপের জন্য আপনি দায়ী থাকবেন।</li>
+                            <li><strong>সিস্টেমের ব্যবহার:</strong> এই সিস্টেমটি শুধুমাত্র নির্ধারিত প্রশাসনিক কাজের জন্য ব্যবহার করা যাবে। সিস্টেমের কোনো দুর্বলতা খুঁজে বের করার চেষ্টা করা বা সিস্টেমের ক্ষতি করা শাস্তিযোগ্য অপরাধ হিসেবে গণ্য হবে।</li>
+                        </ol>
+                        <div class="alert alert-warning mt-3">
+                            <strong>বিশেষ দ্রষ্টব্য:</strong> যদি আপনার কাজের জন্য জেলা নির্ধারণ করা না থাকে, তাহলে দয়া করে অবিলম্বে সেটিংস পেজ থেকে আপনার জেলা নির্বাচন করুন। জেলা নির্ধারণ না করা পর্যন্ত আপনি অন্যান্য ফিচার ব্যবহার করতে পারবেন না।
                         </div>
                     </div>
                 </div>
@@ -361,7 +364,6 @@
                                     <tr>
                                         <th>ইমেইল / নাম</th>
                                         <th>ফোন</th>
-                                        <th>উপজেলা</th>
                                         <th>UID</th>
                                     </tr>
                                 </thead>
@@ -505,6 +507,10 @@
                 <div id="settings" class="page-section fade-in d-none">
                     <div class="card p-4">
                         <h5 class="mb-4">এডমিন সেটিংস</h5>
+                        <!-- First Time Setup Message -->
+                        <div id="firstTimeSetupMsg" class="alert alert-info d-none">
+                            <strong>স্বাগতম!</strong> অ্যাডমিন হিসেবে কাজ শুরু করার জন্য, অনুগ্রহ করে নিচের "গ্লোবাল ডেটা ফিল্টার" থেকে আপনার কাজের জন্য একটি জেলা নির্বাচন করে সেভ করুন। জেলা নির্ধারণ না করা পর্যন্ত আপনি অন্য কোনো পেজ ব্যবহার করতে পারবেন না।
+                        </div>
                         <!-- Admin Name Settings -->
                         <div class="card bg-body-tertiary p-3 mb-4">
                             <h6 class="text-muted mb-3">এডমিনের নাম পরিবর্তন</h6>
@@ -516,15 +522,15 @@
                         </div>
                         <!-- District Filter Settings -->
                         <div class="card bg-body-tertiary p-3">
-                            <h6 class="text-muted mb-3">আপনার কাজের জেলা নির্ধারণ করুন</h6>
-                            <p class="small text-muted">একটি জেলা নির্বাচন করলে, সেই জেলাটি আপনার অ্যাকাউন্টের জন্য নির্ধারিত হয়ে যাবে। আপনি শুধুমাত্র সেই জেলার ডেটা দেখতে এবং পরিচালনা করতে পারবেন। একবার সেট করলে এটি পরিবর্তন করা যাবে না।</p>
+                            <h6 class="text-muted mb-3">গ্লোবাল ডেটা ফিল্টার (আপনার নির্ধারিত জেলা)</h6>
+                            <p class="small text-muted">একটি জেলা নির্বাচন করলে শুধুমাত্র সেই জেলার জন্য ডেটা দেখানো হবে এবং এই সেটিংটি আপনার অ্যাকাউন্টের জন্য লক হয়ে যাবে। অন্য অ্যাডমিনরা এই জেলাটি আর নির্বাচন করতে পারবেন না।</p>
                             <div class="input-group">
                                 <input class="form-control" list="districtOptions" id="districtFilterInput" placeholder="জেলা খুঁজুন বা নির্বাচন করুন...">
                                 <datalist id="districtOptions">
-                                    <!-- Options will be populated by JS from available districts -->
+                                    <!-- Options will be populated by JS -->
                                 </datalist>
-                                <button class="btn btn-success" type="button" id="btnApplyDistrictFilter">জেলা সেট করুন</button>
-                                <button class="btn btn-danger" type="button" id="btnClearDistrictFilter">জেলা রিসেট করুন (শুধু টেস্টের জন্য)</button>
+                                <button class="btn btn-success" type="button" id="btnApplyDistrictFilter">ফিল্টার প্রয়োগ ও সেভ করুন</button>
+                                <button class="btn btn-secondary d-none" type="button" id="btnClearDistrictFilter">ফিল্টার ক্লিয়ার</button>
                             </div>
                             <div id="filterStatus" class="mt-2 small d-none"></div>
                         </div>
@@ -558,7 +564,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        window.db = db; // Make db globally accessible for UI script
 
         const loginSection = document.getElementById('loginSection');
         const mainApp = document.getElementById('mainApp');
@@ -568,17 +573,12 @@
         let editingContactDBId = null;
         let currentCLState = { category: '', division: '', district: '', upazila: '' };
         let contactModal = null;
-        let currentUser = null;
-        window.currentUser = null;
+        let adminConfig = null;
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUser = user;
-                window.currentUser = user;
                 showApp(user);
             } else {
-                currentUser = null;
-                window.currentUser = null;
                 showLogin();
             }
         });
@@ -608,8 +608,7 @@
 
         document.getElementById('btnLogout').addEventListener('click', () => {
             signOut(auth).then(() => {
-                alert("লগ আউট সফল হয়েছে!");
-                window.globalDistrictFilter = null; // Clear filter on logout
+                window.location.reload();
             }).catch((error) => {
                 console.error(error);
             });
@@ -625,36 +624,55 @@
             loginSection.classList.add('d-none');
             mainApp.classList.remove('d-none');
             mainApp.classList.add('d-flex-wrapper');
-            
             document.getElementById('displayUsername').innerText = user.email.split('@')[0];
             contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
             
-            await checkAdminSetup(user);
+            // Check for admin district configuration
+            const adminConfigRef = doc(db, "admin_config", user.uid);
+            const docSnap = await getDoc(adminConfigRef);
+
+            if (docSnap.exists() && docSnap.data().lockedDistrict) {
+                adminConfig = docSnap.data();
+                window.globalDistrictFilter = adminConfig.lockedDistrict;
+                // Load default page for existing configured admin
+                showPage('terms', document.querySelector('#sidebar a[onclick*="terms"]'));
+                updateFilterStatusUI();
+                window.populateDistrictFilter(user.uid); 
+            } else {
+                // New admin or district not set
+                alert("স্বাগতম! অ্যাডমিন হিসেবে কাজ শুরু করার জন্য, অনুগ্রহ করে আপনার কাজের জেলা নির্বাচন করুন।");
+                toggleMenuLock(true); // Lock menu items
+                // Force user to settings page after security check
+                const settingsElement = document.querySelector('#sidebar a[onclick*="settings"]');
+                promptForSettings(settingsElement, true);
+                document.getElementById('firstTimeSetupMsg').classList.remove('d-none');
+                window.populateDistrictFilter(user.uid);
+            }
         }
         
-        // NEW FUNCTION to check if admin has set a district
-        async function checkAdminSetup(user) {
-            const assignmentsRef = collection(db, "district_assignments");
-            const q = query(assignmentsRef, where("admin_uid", "==", user.uid));
-            
-            const querySnapshot = await getDocs(q);
+        // This function will enable/disable sidebar menu items
+        function toggleMenuLock(isLocked) {
+            document.querySelectorAll('a[data-menu-item="true"]').forEach(link => {
+                if(isLocked) {
+                    link.classList.add('disabled-link');
+                } else {
+                    link.classList.remove('disabled-link');
+                }
+            });
+        }
+        
+        function updateFilterStatusUI() {
+            const filterStatus = document.getElementById('filterStatus');
+            const districtInput = document.getElementById('districtFilterInput');
+            const applyBtn = document.getElementById('btnApplyDistrictFilter');
 
-            if (querySnapshot.empty) {
-                // New admin, no district assigned
-                window.globalDistrictFilter = null;
-                alert("স্বাগতম! অ্যাডমিন হিসেবে আপনার কাজের জন্য প্রথমে একটি জেলা নির্ধারণ করতে হবে।");
-                toggleSidebarLinks(false); // Disable other links
-                // Force open settings page with security prompt
-                promptForSettings(document.querySelector('a[onclick*="settings"]'));
-            } else {
-                // Existing admin, district already assigned
-                const assignedDoc = querySnapshot.docs[0];
-                window.globalDistrictFilter = assignedDoc.id;
-                toggleSidebarLinks(true); // Ensure links are enabled
-                updateFilterStatusUI();
-                
-                // Load initial data for the landing page
-                showPage('terms', document.querySelector('#sidebar a[onclick*="terms"]'));
+            if(window.globalDistrictFilter){
+                filterStatus.innerHTML = `বর্তমান নির্ধারিত জেলা: <span class="badge bg-primary fs-6">${window.globalDistrictFilter}</span>`;
+                filterStatus.classList.remove('d-none');
+                districtInput.value = window.globalDistrictFilter;
+                districtInput.disabled = true;
+                applyBtn.disabled = true;
+                applyBtn.innerText = "জেলা নির্ধারিত";
             }
         }
 
@@ -744,24 +762,22 @@
             document.getElementById('btnCancelEditNews').classList.add('d-none');
         }
 
-        // MODIFIED to filter users by the selected district
         async function loadUserList() {
             const tbody = document.getElementById('usersTableBody');
             const noUsersMsg = document.getElementById('noUsersMsg');
             tbody.innerHTML = '';
             noUsersMsg.classList.add('d-none');
 
-            // Ensure a district is selected before fetching users
-            if (!window.globalDistrictFilter) {
-                noUsersMsg.innerText = "ব্যবহারকারীদের তালিকা দেখতে, অনুগ্রহ করে প্রথমে সেটিংস থেকে একটি জেলা নির্বাচন করুন।";
-                noUsersMsg.classList.remove('d-none');
-                return;
-            }
-
             try {
-                // Query users where their 'district' field matches the globally set filter
-                // This assumes user documents have a 'district' and 'upazila' field.
-                const userQuery = query(collection(db, "users"), where("district", "==", window.globalDistrictFilter));
+                let userQuery;
+                if (window.globalDistrictFilter) {
+                    userQuery = query(collection(db, "users"), where("district", "==", window.globalDistrictFilter));
+                } else {
+                    noUsersMsg.innerText = "অনুগ্রহ করে প্রথমে সেটিংস থেকে একটি জেলা নির্ধারণ করুন।";
+                    noUsersMsg.classList.remove('d-none');
+                    return;
+                }
+
                 const querySnapshot = await getDocs(userQuery);
                 
                 if (querySnapshot.empty) {
@@ -771,18 +787,21 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    const upazilaInfo = data.upazila ? `, ${data.upazila}` : '';
                     const row = `
                         <tr>
-                            <td>${data.email || data.name || 'N/A'}</td>
+                            <td>
+                                <div>${data.email || data.name || 'Unknown'}</div>
+                                <small class="text-muted">${data.district || 'জেলা নেই'}${upazilaInfo}</small>
+                            </td>
                             <td>${data.mobile || data.phone || 'N/A'}</td>
-                            <td>${data.upazila || 'N/A'}</td>
                             <td><span class="badge bg-secondary">${doc.id.substring(0, 8)}...</span></td>
                         </tr>
                     `;
                     tbody.innerHTML += row;
                 });
             } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-danger text-center">ডাটা লোড করা যায়নি। Error: ${e.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">ডাটা লোড করা যায়নি। Error: ${e.message}</td></tr>`;
                 console.error("Error loading users: ", e);
             }
         }
@@ -941,7 +960,17 @@
         };
 
         window.loadNewsData = loadNewsList;
-        window.loadAvailableDistricts = loadAvailableDistricts; // Make it globally accessible
+        
+        // --- Settings Page Logic (Firebase part) ---
+        
+        window.db = db; // Make db accessible to the other script
+        window.auth = auth;
+        window.setDoc = setDoc;
+        window.getDocs = getDocs;
+        window.doc = doc;
+        window.collection = collection;
+        window.toggleMenuLock = toggleMenuLock;
+        window.updateFilterStatusUI = updateFilterStatusUI;
 
     </script>
 
@@ -976,30 +1005,27 @@
             if(pageId === 'userlist' && window.loadUserListRef) window.loadUserListRef();
             if(pageId === 'updates' && window.loadNewsData) window.loadNewsData();
             if(pageId === 'contactlist') initContactList();
-            if(pageId === 'settings' && window.loadAvailableDistricts) window.loadAvailableDistricts();
         }
 
-        // MODIFIED: Security prompt for settings
-        function promptForSettings(element) {
+        // Modified: Security prompt for settings
+        function promptForSettings(element, isFirstSetup = false) {
             const securityKey = "12345678"; // The hardcoded 8-digit security key
             const userInput = prompt("সেটিংস এ প্রবেশ করতে ৮-সংখ্যার সিকিউরিটি কী দিন:");
 
             if (userInput === null) {
-                // User cancelled the prompt. If they are a new user, they are stuck.
-                if (!window.globalDistrictFilter) {
-                    alert("সেটিংস কনফিগার করা আবশ্যক। অনুগ্রহ করে আবার চেষ্টা করুন।");
+                // User cancelled the prompt
+                if(isFirstSetup) {
+                    alert("জেলা নির্ধারণ করা আবশ্যক। অনুগ্রহ করে আবার চেষ্টা করুন।");
                 }
                 return;
             }
 
             if (userInput === securityKey) {
-                // Correct key, show the page
                 showPage('settings', element);
             } else {
-                // Incorrect key
                 alert("সিকিউরিটি কী সঠিক নয়!");
-                if (!window.globalDistrictFilter) {
-                    alert("সেটিংস কনফিগার করা আবশ্যক। অনুগ্রহ করে আবার চেষ্টা করুন।");
+                if(isFirstSetup) {
+                   // signOut(auth); // Optionally log out user if they can't provide key on first setup
                 }
             }
         }
@@ -1017,11 +1043,12 @@
         }
 
         // --- CONTACT LIST LOGIC (Data and Functions) ---
+        // CORRECTED: Full Geo Data for Bangladesh
         const bdGeoData = {
             "Dhaka": {
                 "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Hazaribagh", "Ramna", "Tejgaon", "Gulshan", "Mirpur", "Pallabi", "Kafrul", "Cantonment", "Uttara", "Mohammadpur", "Dhanmondi", "Badda", "Khilkhet", "Demra", "Jatrabari", "Lalbagh", "Kotwali", "Sutrapur"],
                 "Gazipur": ["Gazipur Sadar", "Kaliakair", "Kapasia", "Sreepur", "Kaliganj"],
-                "Narayanganj": ["Narayanjganj Sadar", "Bandar", "Araihazar", "Rupganj", "Sonargaon"],
+                "Narayanganj": ["Narayanganj Sadar", "Bandar", "Araihazar", "Rupganj", "Sonargaon"],
                 "Manikganj": ["Manikganj Sadar", "Singair", "Saturia", "Shivalaya", "Ghior", "Daulatpur", "Harirampur"],
                 "Munshiganj": ["Munshiganj Sadar", "Tongibari", "Sreenagar", "Lohajang", "Gajaria", "Sirajdikhan"],
                 "Narsingdi": ["Narsingdi Sadar", "Belabo", "Monohardi", "Palash", "Raipura", "Shibpur"],
@@ -1115,24 +1142,21 @@
         let clState = { step: 0, category: '', division: '', district: '', upazila: '' };
 
         function initContactList() {
-            if (!window.globalDistrictFilter) {
-                const container = document.getElementById('clCategoryList');
-                container.innerHTML = `<div class="alert alert-warning text-center">কন্টাক্ট লিস্ট দেখতে, অনুগ্রহ করে প্রথমে সেটিংস থেকে একটি জেলা নির্বাচন করুন।</div>`;
-                return;
-            }
-            
-            let divisionName = '';
-            let districtName = window.globalDistrictFilter;
-            for (const div in bdGeoData) {
-                if (bdGeoData[div].hasOwnProperty(districtName)) {
-                    divisionName = div;
-                    break;
+            if (window.globalDistrictFilter) {
+                let divisionName = '';
+                let districtName = window.globalDistrictFilter;
+                // Find the division for the selected district
+                for (const div in bdGeoData) {
+                    if (bdGeoData[div].hasOwnProperty(districtName)) {
+                        divisionName = div;
+                        break;
+                    }
                 }
-            }
-            if (divisionName) {
-                clState.division = divisionName;
-                clState.district = districtName;
-                document.getElementById('clTitle').innerText = `${districtName} জেলার জন্য ক্যাটাগরি নির্বাচন করুন`;
+                if (divisionName) {
+                    clState.division = divisionName;
+                    clState.district = districtName;
+                    document.getElementById('clTitle').innerText = `${districtName} জেলার জন্য ক্যাটাগরি নির্বাচন করুন`;
+                }
             }
             renderCategories();
             goToClStep(0);
@@ -1142,7 +1166,9 @@
             clState.step = stepIndex;
             document.getElementById('clSlider').style.transform = `translateX(-${stepIndex * 20}%)`;
             const titles = ["ক্যাটাগরি", "বিভাগ", "জেলা", "উপজেলা", "রেজাল্ট / কন্টাক্ট লিস্ট"];
-            document.getElementById('clTitle').innerText = titles[stepIndex] + " নির্বাচন করুন";
+            if (!window.globalDistrictFilter || stepIndex < 3) {
+                document.getElementById('clTitle').innerText = titles[stepIndex] + " নির্বাচন করুন";
+            }
             document.getElementById('clBackBtn').classList.toggle('d-none', stepIndex <= 0);
         }
 
@@ -1171,9 +1197,11 @@
                 container.appendChild(createListItem(`<i class="fas ${cat.icon} me-3 text-primary" style="width:20px"></i> ${cat.name}`, () => {
                     clState.category = cat.name;
                     if (window.globalDistrictFilter) {
+                        // If filter is active, jump to upazila selection
                         renderUpazilas(clState.division, clState.district);
                         goToClStep(3);
                     } else {
+                        // Normal flow
                         renderDivisions();
                         goToClStep(1);
                     }
@@ -1218,79 +1246,20 @@
             }
         }
         
-        function toggleSidebarLinks(enabled) {
-            const links = document.querySelectorAll('#sidebar ul.components a');
-            links.forEach(link => {
-                // Always keep the settings link enabled
-                if (link.getAttribute('onclick').includes('settings')) {
-                    link.classList.remove('disabled-link');
-                    return;
-                }
-                if (enabled) {
-                    link.classList.remove('disabled-link');
-                } else {
-                    link.classList.add('disabled-link');
-                }
-            });
-        }
-
-        function updateFilterStatusUI() {
-            const filterStatus = document.getElementById('filterStatus');
-            if (window.globalDistrictFilter) {
-                filterStatus.innerHTML = `আপনার নির্ধারিত জেলা: <span class="badge bg-primary fs-6">${window.globalDistrictFilter}</span>`;
-                filterStatus.classList.remove('d-none');
-                document.getElementById('districtFilterInput').disabled = true;
-                document.getElementById('btnApplyDistrictFilter').disabled = true;
-            } else {
-                filterStatus.classList.add('d-none');
-                document.getElementById('districtFilterInput').disabled = false;
-                document.getElementById('btnApplyDistrictFilter').disabled = false;
-            }
-        }
-        
-        // --- Settings Page Logic ---
-        async function loadAvailableDistricts() {
-            const { getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-            const districtOptions = document.getElementById('districtOptions');
-            districtOptions.innerHTML = '';
-
-            // 1. Get all assigned districts from Firestore
-            const assignedDistricts = new Set();
-            const assignmentsSnapshot = await getDocs(collection(window.db, "district_assignments"));
-            assignmentsSnapshot.forEach(doc => {
-                assignedDistricts.add(doc.id);
-            });
-
-            // 2. Get all possible districts from local data
-            const allDistricts = new Set();
+        const isValidDistrict = (district) => {
             for (const division in bdGeoData) {
-                for (const district in bdGeoData[division]) {
-                    allDistricts.add(district);
-                }
+                if (bdGeoData[division].hasOwnProperty(district)) return true;
             }
-
-            // 3. Populate datalist only with unassigned districts
-            const availableDistricts = Array.from(allDistricts)
-                .filter(district => !assignedDistricts.has(district))
-                .sort();
-            
-            availableDistricts.forEach(district => {
-                const option = document.createElement('option');
-                option.value = district;
-                districtOptions.appendChild(option);
-            });
+            return false;
         }
 
-
+        // --- Settings Page Logic ---
         document.addEventListener('DOMContentLoaded', () => {
-            const { doc, setDoc, deleteDoc } = import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-
             const adminNameInput = document.getElementById('adminNameInput');
             const btnSaveAdminName = document.getElementById('btnSaveAdminName');
             const displayUsername = document.getElementById('displayUsername');
             const districtFilterInput = document.getElementById('districtFilterInput');
             const btnApplyFilter = document.getElementById('btnApplyDistrictFilter');
-            const btnClearFilter = document.getElementById('btnClearDistrictFilter');
 
             if (btnSaveAdminName) {
                 btnSaveAdminName.addEventListener('click', () => {
@@ -1305,60 +1274,78 @@
                 });
             }
 
-            const isValidDistrict = (district) => {
-                for (const division in bdGeoData) {
-                    if (bdGeoData[division].hasOwnProperty(district)) return true;
-                }
-                return false;
-            }
-
             if (btnApplyFilter) {
                 btnApplyFilter.addEventListener('click', async () => {
                     const selectedDistrict = districtFilterInput.value.trim();
                     if (selectedDistrict && isValidDistrict(selectedDistrict)) {
                         
-                        // Check if it's already taken (race condition)
-                        const assignedDoc = await getDoc(doc(window.db, "district_assignments", selectedDistrict));
-                        if (assignedDoc.exists()) {
-                            alert("দুঃখিত, এই জেলাটি অন্য একজন অ্যাডমিন ইতিমধ্যেই নিয়ে নিয়েছেন। অনুগ্রহ করে তালিকা রিফ্রেশ করে আবার চেষ্টা করুন।");
-                            await loadAvailableDistricts(); // Refresh list
-                            return;
-                        }
-                        
-                        // Assign the district in Firestore
-                        await setDoc(doc(window.db, "district_assignments", selectedDistrict), {
-                            admin_uid: window.currentUser.uid,
-                            admin_email: window.currentUser.email,
-                            assignedAt: new Date()
-                        });
+                        const currentUser = window.auth.currentUser;
+                        if(!currentUser) return alert("ত্রুটি: অ্যাডমিন লগইন পাওয়া যায়নি।");
 
-                        window.globalDistrictFilter = selectedDistrict;
-                        alert(`${selectedDistrict} জেলাটি আপনার জন্য সফলভাবে সেট করা হয়েছে।`);
-                        updateFilterStatusUI();
-                        toggleSidebarLinks(true); // Enable links after setup
-                        showPage('terms', document.querySelector('#sidebar a[onclick*="terms"]')); // Go to landing page
+                        const adminConfigRef = window.doc(window.db, "admin_config", currentUser.uid);
+
+                        try {
+                            await window.setDoc(adminConfigRef, { lockedDistrict: selectedDistrict });
+                            window.globalDistrictFilter = selectedDistrict;
+                            alert(`${selectedDistrict} জেলাটি আপনার জন্য সফলভাবে সেট করা হয়েছে।`);
+                            
+                            window.toggleMenuLock(false);
+                            window.updateFilterStatusUI();
+                            document.getElementById('firstTimeSetupMsg').classList.add('d-none');
+                            
+                            const activePage = document.querySelector('.page-section:not(.d-none)');
+                            if (activePage) showPage(activePage.id, document.querySelector(`#sidebar a[onclick*="'${activePage.id}'"]`));
+                        
+                        } catch(e) {
+                            alert("ত্রুটি: জেলা সেট করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
+                            console.error("Error setting district:", e);
+                        }
+
                     } else {
                         alert('অনুগ্রহ করে তালিকা থেকে একটি সঠিক জেলা নির্বাচন করুন।');
                     }
                 });
             }
-            
-            // This button should probably be removed in production. It's for testing.
-            if (btnClearFilter) {
-                btnClearFilter.addEventListener('click', async () => {
-                    if (!window.globalDistrictFilter) {
-                        alert("কোনো জেলা সেট করা নেই।");
-                        return;
-                    }
-                    if (confirm(`আপনি কি সত্যিই ${window.globalDistrictFilter} জেলা রিসেট করতে চান? এই কাজটি ফেরানো যাবে না।`)) {
-                        await deleteDoc(doc(window.db, "district_assignments", window.globalDistrictFilter));
-                        window.globalDistrictFilter = null;
-                        alert('জেলা রিসেট করা হয়েছে।');
-                        location.reload(); // Reload the page to restart the setup process
-                    }
-                });
-            }
         });
+        
+        async function populateDistrictFilter(currentAdminUid) {
+            const districtOptions = document.getElementById('districtOptions');
+            districtOptions.innerHTML = '';
+            
+            // 1. Get all districts from local data
+            const allDistricts = new Set();
+            for (const division in bdGeoData) {
+                for (const district in bdGeoData[division]) {
+                    allDistricts.add(district);
+                }
+            }
+
+            // 2. Get all locked districts from Firestore
+            const lockedDistricts = new Set();
+            let currentAdminDistrict = null;
+            const querySnapshot = await window.getDocs(window.collection(window.db, "admin_config"));
+            querySnapshot.forEach((doc) => {
+                if (doc.id === currentAdminUid) {
+                    currentAdminDistrict = doc.data().lockedDistrict;
+                } else {
+                    lockedDistricts.add(doc.data().lockedDistrict);
+                }
+            });
+
+            // 3. Create available districts list
+            const sortedDistricts = Array.from(allDistricts).sort();
+            sortedDistricts.forEach(district => {
+                // Add district if it's not locked by OTHERS. 
+                // The current admin should see their own locked district in the list.
+                if (!lockedDistricts.has(district)) {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    districtOptions.appendChild(option);
+                }
+            });
+        }
+        window.populateDistrictFilter = populateDistrictFilter;
+
     </script>
 </body>
 </html>

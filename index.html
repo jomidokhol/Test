@@ -639,7 +639,7 @@
                     </div>
                 </div>
 
-                <!-- Settings Section (Updated with Pass Key) -->
+                <!-- Settings Section (MODIFIED) -->
                 <div id="settings" class="page-section fade-in d-none">
                     <div class="card p-4" style="max-width: 500px; margin: 0 auto;">
                         <h5 class="mb-4 text-primary"><i class="fas fa-user-shield me-2"></i>পাসওয়ার্ড পরিবর্তন</h5>
@@ -662,6 +662,18 @@
                             <small class="form-text text-muted">বর্তমান কী: <span id="currentPassKeyDisplay" class="fw-bold">লোড হচ্ছে...</span></small>
                         </div>
                         <button id="btnUpdatePassKey" class="btn btn-success w-100 fw-bold">পাস-কী আপডেট করুন</button>
+                    </div>
+                    
+                    <!-- NEW: Secondary Admin Security Key -->
+                    <div class="card p-4 mt-4" style="max-width: 500px; margin: 0 auto;">
+                        <h5 class="mb-4 text-danger"><i class="fas fa-user-lock me-2"></i>Secondary Admin Security Key</h5>
+                        <div class="alert alert-warning small">এই কী '2nd-admin.html' ফাইলে প্রবেশের জন্য ব্যবহৃত হয়।</div>
+                        <div class="mb-3">
+                            <label class="form-label">নতুন সিকিউরিটি কী (৮ সংখ্যা)</label>
+                            <input type="text" class="form-control" id="newSecurityKey" placeholder="87654321" maxlength="8">
+                            <small class="form-text text-muted">বর্তমান কী: <span id="currentSecurityKeyDisplay" class="fw-bold">লোড হচ্ছে...</span></small>
+                        </div>
+                        <button id="btnUpdateSecurityKey" class="btn btn-danger w-100 fw-bold">সিকিউরিটি কী আপডেট করুন</button>
                     </div>
                 </div>
 
@@ -1460,7 +1472,39 @@
             }
         });
         
+        // --- SECURITY KEY UPDATE LOGIC (NEW) ---
+        document.getElementById('btnUpdateSecurityKey').addEventListener('click', async () => {
+            const newKey = document.getElementById('newSecurityKey').value;
+            if (!/^\d{8}$/.test(newKey)) {
+                return alert("সিকিউরিটি কী অবশ্যই ৮ সংখ্যার হতে হবে।");
+            }
+            try {
+                await setDoc(doc(db, "settings", "security"), { key: newKey }, { merge: true });
+                alert("সিকিউরিটি কী সফলভাবে আপডেট হয়েছে!");
+                document.getElementById('currentSecurityKeyDisplay').innerText = newKey;
+                document.getElementById('newSecurityKey').value = '';
+            } catch (e) {
+                alert("এরর: " + e.message + "\n\nFirestore Rules চেক করুন। আপনার UID কি সঠিকভাবে সেট করা আছে?");
+            }
+        });
+
+        async function loadSecurityKey() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "security"));
+                if (docSnap.exists() && docSnap.data().key) {
+                    document.getElementById('currentSecurityKeyDisplay').innerText = docSnap.data().key;
+                } else {
+                    document.getElementById('currentSecurityKeyDisplay').innerText = 'এখনো সেট করা হয়নি';
+                }
+            } catch (e) {
+                document.getElementById('currentSecurityKeyDisplay').innerText = 'লোড করা যায়নি';
+                console.error("Error fetching security key:", e);
+            }
+        }
+        
+        // MODIFIED: This function now loads all settings data
         async function loadSettingsData() {
+            // Load Pass Key
             try {
                 const docSnap = await getDoc(doc(db, "settings", "admin"));
                 if (docSnap.exists() && docSnap.data().passKey) {
@@ -1472,6 +1516,8 @@
                 document.getElementById('currentPassKeyDisplay').innerText = 'লোড করা যায়নি';
                 console.error("Error fetching passkey:", e);
             }
+            // Load Security Key
+            await loadSecurityKey();
         }
 
         // --- "Apply for Admin" Button Visibility Logic ---

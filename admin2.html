@@ -627,22 +627,18 @@
             document.getElementById('displayUsername').innerText = user.email.split('@')[0];
             contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
             
-            // Check for admin district configuration
             const adminConfigRef = doc(db, "admin_config", user.uid);
             const docSnap = await getDoc(adminConfigRef);
 
             if (docSnap.exists() && docSnap.data().lockedDistrict) {
                 adminConfig = docSnap.data();
                 window.globalDistrictFilter = adminConfig.lockedDistrict;
-                // Load default page for existing configured admin
                 showPage('terms', document.querySelector('#sidebar a[onclick*="terms"]'));
                 updateFilterStatusUI();
                 window.populateDistrictFilter(user.uid); 
             } else {
-                // New admin or district not set
                 alert("স্বাগতম! অ্যাডমিন হিসেবে কাজ শুরু করার জন্য, অনুগ্রহ করে আপনার কাজের জেলা নির্বাচন করুন।");
-                toggleMenuLock(true); // Lock menu items
-                // Force user to settings page after security check
+                toggleMenuLock(true);
                 const settingsElement = document.querySelector('#sidebar a[onclick*="settings"]');
                 promptForSettings(settingsElement, true);
                 document.getElementById('firstTimeSetupMsg').classList.remove('d-none');
@@ -650,7 +646,6 @@
             }
         }
         
-        // This function will enable/disable sidebar menu items
         function toggleMenuLock(isLocked) {
             document.querySelectorAll('a[data-menu-item="true"]').forEach(link => {
                 if(isLocked) {
@@ -787,12 +782,11 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const upazilaInfo = data.upazila ? `, ${data.upazila}` : '';
                     const row = `
                         <tr>
                             <td>
                                 <div>${data.email || data.name || 'Unknown'}</div>
-                                <small class="text-muted">${data.district || 'জেলা নেই'}${upazilaInfo}</small>
+                                <small class="text-muted">${data.upazila || 'উপজেলা নেই'}</small>
                             </td>
                             <td>${data.mobile || data.phone || 'N/A'}</td>
                             <td><span class="badge bg-secondary">${doc.id.substring(0, 8)}...</span></td>
@@ -961,11 +955,10 @@
 
         window.loadNewsData = loadNewsList;
         
-        // --- Settings Page Logic (Firebase part) ---
-        
-        window.db = db; // Make db accessible to the other script
+        window.db = db;
         window.auth = auth;
         window.setDoc = setDoc;
+        window.getDoc = getDoc;
         window.getDocs = getDocs;
         window.doc = doc;
         window.collection = collection;
@@ -976,7 +969,6 @@
 
     <!-- UI Logic Script -->
     <script>
-        // Global variable for filtering
         window.globalDistrictFilter = null;
 
         function toggleSidebar() {
@@ -1001,22 +993,32 @@
                 if (window.innerWidth < 768) toggleSidebar();
             }
 
-            // Trigger data load for specific pages
             if(pageId === 'userlist' && window.loadUserListRef) window.loadUserListRef();
             if(pageId === 'updates' && window.loadNewsData) window.loadNewsData();
             if(pageId === 'contactlist') initContactList();
         }
 
-        // Modified: Security prompt for settings
-        function promptForSettings(element, isFirstSetup = false) {
-            const securityKey = "12345678"; // The hardcoded 8-digit security key
-            const userInput = prompt("সেটিংস এ প্রবেশ করতে ৮-সংখ্যার সিকিউরিটি কী দিন:");
-
-            if (userInput === null) {
-                // User cancelled the prompt
-                if(isFirstSetup) {
-                    alert("জেলা নির্ধারণ করা আবশ্যক। অনুগ্রহ করে আবার চেষ্টা করুন।");
+        async function promptForSettings(element, isFirstSetup = false) {
+            let securityKey = null;
+            try {
+                const docSnap = await window.getDoc(window.doc(window.db, "settings", "security"));
+                if (docSnap.exists() && docSnap.data().key) {
+                    securityKey = docSnap.data().key;
                 }
+            } catch (e) {
+                alert("সিকিউরিটি কী লোড করা যায়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।");
+                console.error("Failed to fetch security key:", e);
+                return;
+            }
+
+            if (!securityKey) {
+                alert("কোনো সিকিউরিটি কী সেট করা নেই। অ্যাডমিনের সাথে যোগাযোগ করুন।");
+                return;
+            }
+
+            const userInput = prompt("সেটিংস এ প্রবেশ করতে ৮-সংখ্যার সিকিউরিটি কী দিন:");
+            if (userInput === null) {
+                if(isFirstSetup) alert("জেলা নির্ধারণ করা আবশ্যক। অনুগ্রহ করে আবার চেষ্টা করুন।");
                 return;
             }
 
@@ -1024,9 +1026,6 @@
                 showPage('settings', element);
             } else {
                 alert("সিকিউরিটি কী সঠিক নয়!");
-                if(isFirstSetup) {
-                   // signOut(auth); // Optionally log out user if they can't provide key on first setup
-                }
             }
         }
 
@@ -1042,8 +1041,6 @@
             btn.classList.toggle('btn-outline-warning', !isDark);
         }
 
-        // --- CONTACT LIST LOGIC (Data and Functions) ---
-        // CORRECTED: Full Geo Data for Bangladesh
         const bdGeoData = {
             "Dhaka": {
                 "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Hazaribagh", "Ramna", "Tejgaon", "Gulshan", "Mirpur", "Pallabi", "Kafrul", "Cantonment", "Uttara", "Mohammadpur", "Dhanmondi", "Badda", "Khilkhet", "Demra", "Jatrabari", "Lalbagh", "Kotwali", "Sutrapur"],
@@ -1145,7 +1142,6 @@
             if (window.globalDistrictFilter) {
                 let divisionName = '';
                 let districtName = window.globalDistrictFilter;
-                // Find the division for the selected district
                 for (const div in bdGeoData) {
                     if (bdGeoData[div].hasOwnProperty(districtName)) {
                         divisionName = div;
@@ -1175,7 +1171,7 @@
         function prevContactStep() {
             if (clState.step > 0) {
                 if (window.globalDistrictFilter && clState.step === 3) {
-                    goToClStep(0); // Go back to categories from upazila if filter is on
+                    goToClStep(0);
                 } else {
                     goToClStep(clState.step - 1);
                 }
@@ -1197,11 +1193,9 @@
                 container.appendChild(createListItem(`<i class="fas ${cat.icon} me-3 text-primary" style="width:20px"></i> ${cat.name}`, () => {
                     clState.category = cat.name;
                     if (window.globalDistrictFilter) {
-                        // If filter is active, jump to upazila selection
                         renderUpazilas(clState.division, clState.district);
                         goToClStep(3);
                     } else {
-                        // Normal flow
                         renderDivisions();
                         goToClStep(1);
                     }
@@ -1246,14 +1240,18 @@
             }
         }
         
-        const isValidDistrict = (district) => {
+        function findDistrictCaseInsensitive(userInput) {
+            const lowerCaseInput = userInput.toLowerCase();
             for (const division in bdGeoData) {
-                if (bdGeoData[division].hasOwnProperty(district)) return true;
+                for (const district in bdGeoData[division]) {
+                    if (district.toLowerCase() === lowerCaseInput) {
+                        return district; 
+                    }
+                }
             }
-            return false;
+            return null; 
         }
 
-        // --- Settings Page Logic ---
         document.addEventListener('DOMContentLoaded', () => {
             const adminNameInput = document.getElementById('adminNameInput');
             const btnSaveAdminName = document.getElementById('btnSaveAdminName');
@@ -1276,18 +1274,17 @@
 
             if (btnApplyFilter) {
                 btnApplyFilter.addEventListener('click', async () => {
-                    const selectedDistrict = districtFilterInput.value.trim();
-                    if (selectedDistrict && isValidDistrict(selectedDistrict)) {
-                        
+                    const userInput = districtFilterInput.value.trim();
+                    const correctlyCasedDistrict = findDistrictCaseInsensitive(userInput);
+
+                    if (correctlyCasedDistrict) {
                         const currentUser = window.auth.currentUser;
                         if(!currentUser) return alert("ত্রুটি: অ্যাডমিন লগইন পাওয়া যায়নি।");
-
                         const adminConfigRef = window.doc(window.db, "admin_config", currentUser.uid);
-
                         try {
-                            await window.setDoc(adminConfigRef, { lockedDistrict: selectedDistrict });
-                            window.globalDistrictFilter = selectedDistrict;
-                            alert(`${selectedDistrict} জেলাটি আপনার জন্য সফলভাবে সেট করা হয়েছে।`);
+                            await window.setDoc(adminConfigRef, { lockedDistrict: correctlyCasedDistrict });
+                            window.globalDistrictFilter = correctlyCasedDistrict;
+                            alert(`${correctlyCasedDistrict} জেলাটি আপনার জন্য সফলভাবে সেট করা হয়েছে।`);
                             
                             window.toggleMenuLock(false);
                             window.updateFilterStatusUI();
@@ -1300,7 +1297,6 @@
                             alert("ত্রুটি: জেলা সেট করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
                             console.error("Error setting district:", e);
                         }
-
                     } else {
                         alert('অনুগ্রহ করে তালিকা থেকে একটি সঠিক জেলা নির্বাচন করুন।');
                     }
@@ -1312,7 +1308,6 @@
             const districtOptions = document.getElementById('districtOptions');
             districtOptions.innerHTML = '';
             
-            // 1. Get all districts from local data
             const allDistricts = new Set();
             for (const division in bdGeoData) {
                 for (const district in bdGeoData[division]) {
@@ -1320,24 +1315,17 @@
                 }
             }
 
-            // 2. Get all locked districts from Firestore
             const lockedDistricts = new Set();
-            let currentAdminDistrict = null;
             const querySnapshot = await window.getDocs(window.collection(window.db, "admin_config"));
             querySnapshot.forEach((doc) => {
-                if (doc.id === currentAdminUid) {
-                    currentAdminDistrict = doc.data().lockedDistrict;
-                } else {
-                    lockedDistricts.add(doc.data().lockedDistrict);
+                if (doc.id !== currentAdminUid && doc.data().lockedDistrict) {
+                    lockedDistricts.add(doc.data().lockedDistrict.toLowerCase());
                 }
             });
 
-            // 3. Create available districts list
             const sortedDistricts = Array.from(allDistricts).sort();
             sortedDistricts.forEach(district => {
-                // Add district if it's not locked by OTHERS. 
-                // The current admin should see their own locked district in the list.
-                if (!lockedDistricts.has(district)) {
+                if (!lockedDistricts.has(district.toLowerCase())) {
                     const option = document.createElement('option');
                     option.value = district;
                     districtOptions.appendChild(option);
